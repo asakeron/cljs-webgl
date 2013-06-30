@@ -33,3 +33,15 @@
      :premultiplied-alpha (.-premultipliedAlpha js-obj),
      :preserve-drawing-buffer (.-preserveDrawingBuffer js-obj)
      }))
+
+(defn get-canvas
+  [gl-context]
+  (.-canvas gl-context))
+
+(defn get-drawing-buffer-width
+  [gl-context]
+  (.-drawingBufferWidth gl-context))
+
+(defn get-drawing-buffer-height
+  [gl-context]
+  (.-drawingBufferHeight gl-context))
