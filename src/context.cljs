@@ -45,3 +45,16 @@
 (defn get-drawing-buffer-height
   [gl-context]
   (.-drawingBufferHeight gl-context))
+
+(defn is-context-lost?
+  [gl-context]
+  (.isContextLost gl-context))
+
+(defn get-supported-extensions
+  [gl-context]
+  (list (.getSupportedExtensions gl-context)))
+
+; TODO: We need to wrap the extension object in clojure constructs in some way.
+(defn get-extension
+  [gl-context extension-name]
+  (.getExtension gl-context extension-name))

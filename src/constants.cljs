@@ -1,5 +1,5 @@
 ; WebGL constants as specified in https://www.khronos.org/registry/webgl/specs/latest/webgl.idl
-(ns gl)
+(ns cljswebgl.gl)
 
 ; ClearBufferMask
 (def depth-buffer-bit 0x00000100)
