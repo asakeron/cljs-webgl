@@ -16,3 +16,16 @@
 (defn get-attached-shaders
   [gl-context program]
   (list (.getAttachedShaders gl-context program)))
+
+(defn get-shader-source
+  [gl-context shader]
+  (.getShaderSource gl-context shader))
+
+(defn get-shader-info-log
+  [gl-context shader]
+  (.getShaderInfoLog gl-context shader))
+
+(defn get-shader-parameter
+  "Parameter may be the constants shader-type, compile-status and delete-status"
+  [gl-context shader parameter]
+  (.getShaderParameter gl-context shader parameter))
