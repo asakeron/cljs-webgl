@@ -29,3 +29,15 @@
   "Parameter may be the constants shader-type, compile-status and delete-status"
   [gl-context shader parameter]
   (.getShaderParameter gl-context shader parameter))
+
+(defn get-shader-precision-format
+  "shader-type may be fragment-shader or vertex-shader. precision type may be low-float, medium-float, high-float, low-int, medium-int or high-int"
+  [gl-context shader-type precision-type]
+  (let [js-obj (.getShaderPrecisionFormat gl-context shader-type precision-type)]
+    {:range-min (.-rangeMin js-obj)
+     :range-max (.-rangeMax js-obj)
+     :precision (.-precision js-obj)}))
+
+(defn is-shader?
+  [gl-context shader]
+  (.isShader gl-context shader))
