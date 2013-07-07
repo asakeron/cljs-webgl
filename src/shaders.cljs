@@ -15,7 +15,7 @@
 
 (defn get-attached-shaders
   [gl-context program]
-  (list (.getAttachedShaders gl-context program)))
+  (lazy-seq (.getAttachedShaders gl-context program)))
 
 (defn get-shader-source
   [gl-context shader]

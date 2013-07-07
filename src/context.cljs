@@ -52,7 +52,7 @@
 
 (defn get-supported-extensions
   [gl-context]
-  (list (.getSupportedExtensions gl-context)))
+  (lazy-seq (.getSupportedExtensions gl-context)))
 
 ; TODO: We need to wrap the extension object in clojure constructs in some way.
 (defn get-extension
