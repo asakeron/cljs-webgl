@@ -1,4 +1,4 @@
-(ns cljswebgl.gl.shaders)
+(ns cljs-webgl.shaders)
 
 (defn create-shader
   [gl-context type source]

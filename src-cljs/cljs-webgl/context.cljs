@@ -1,4 +1,4 @@
-(ns cljswebgl.gl)
+(ns cljs-webgl.context)
   
 (defn get-context
   

@@ -1,4 +1,4 @@
-(ns cljswebgl.buffer)
+(ns cljs-webgl.buffer)
 
 (defn create-buffer
   ;; target may be gl-array-buffer or gl-element-array-buffer

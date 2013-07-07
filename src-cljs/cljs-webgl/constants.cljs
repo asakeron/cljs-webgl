@@ -1,4 +1,4 @@
-(ns cljswebgl.gl.constants)
+(ns cljs-webgl.constants)
 ; ClearBufferMask
 (def depth-buffer-bit 0x00000100)
 (def stencil-buffer-bit 0x00000400)

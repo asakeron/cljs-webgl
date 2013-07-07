@@ -1,4 +1,4 @@
-(ns cljswebgl.typed-arrays)
+(ns cljs-webgl.typed-arrays)
 
 (defn int8
   [collection]
