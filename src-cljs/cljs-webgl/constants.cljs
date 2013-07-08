@@ -1,4 +1,11 @@
-(ns cljs-webgl.constants)
+(ns cljs-webgl.constants
+  (:refer-clojure :exclude [byte
+                            short
+                            int
+                            float
+                            keep
+                            replace
+                            repeat]))
 ; ClearBufferMask
 (def depth-buffer-bit 0x00000100)
 (def stencil-buffer-bit 0x00000400)
