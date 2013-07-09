@@ -11,6 +11,7 @@
   [gl-context shaders]
   (let [program (.createProgram gl-context)]
     (dorun (map (fn [shader] (.attachShader gl-context program shader)) shaders))
+    (.linkProgram gl-context program)
     program))
 
 (defn get-attached-shaders
