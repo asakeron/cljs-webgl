@@ -43,6 +43,10 @@
   [gl-context shader-program attrib-name]
   (.getAttribLocation gl-context shader-program attrib-name))
 
+(defn get-uniform-location
+  [gl-context shader-program uniform-name]
+  (.getUniformLocation gl-context shader-program uniform-name))
+
 (defn is-shader?
   [gl-context shader]
   (.isShader gl-context shader))
