@@ -39,6 +39,10 @@
      :range-max (.-rangeMax js-obj)
      :precision (.-precision js-obj)}))
 
+(defn get-attrib-location
+  [gl-context shader-program attrib-name]
+  (.getAttribLocation gl-context shader-program attrib-name))
+
 (defn is-shader?
   [gl-context shader]
   (.isShader gl-context shader))
