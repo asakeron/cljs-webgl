@@ -9,7 +9,7 @@
     buffer))
 
 (defn draw-arrays
-  [gl-context shader buffer target vertex-attrib-array draw-type vertex-type num-vertices uniforms]
+  [gl-context shader buffer target vertex-attrib-array draw-type vertex-type vertex-index components-per-vertex vertex-normalized vertex-stride vertex-offset num-vertices uniforms]
   (let [set-uniform 
         (fn [uniform]
         
@@ -23,7 +23,7 @@
             (.uniform2fv gl-context uniform-location values))
             
           (defmethod set-specific-uniform [3 js/Float32Array] [uniform-location values]
-              (.uniform3fv gl-context uniform-location values))
+            (.uniform3fv gl-context uniform-location values))
           
           (defmethod set-specific-uniform [4 js/Float32Array] [uniform-location values]
             (.uniform4fv gl-context uniform-location values))
@@ -45,5 +45,5 @@
     (dorun (map #(set-uniform %) uniforms))
     (.bindBuffer gl-context target buffer)
     (.enableVertexAttribArray gl-context vertex-attrib-array)
-    (.vertexAttribPointer gl-context 0 2 vertex-type false 0 0)
+    (.vertexAttribPointer gl-context vertex-index components-per-vertex vertex-type vertex-normalized vertex-stride vertex-offset)
     (.drawArrays gl-context draw-type 0 num-vertices)))
