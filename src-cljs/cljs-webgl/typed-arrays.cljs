@@ -53,7 +53,7 @@
      (= value-type js/Int8Array)
      (= value-type js/Uint8Array)
      (= value-type js/Uint8ClampedArray)
-     (= value-tyoe js/Int16Array)
+     (= value-type js/Int16Array)
      (= value-type js/Uint16Array)
      (= value-type js/Int32Array)
      (= value-type js/Uint32Array)
