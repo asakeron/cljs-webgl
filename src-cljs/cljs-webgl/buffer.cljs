@@ -1,7 +1,13 @@
 (ns cljs-webgl.buffers)
 
 (defn create-buffer
-  ;; target may be gl-array-buffer or gl-element-array-buffer
+  "Creates a new buffer with initialized `data`. 
+
+  `data` must be a typed-array
+
+  `target` may be `array-buffer` or `element-array-buffer`
+
+  `usage` may be `static-draw` or `dynamic-draw`"
   [gl-context data target usage]
   (let [buffer (.createBuffer gl-context)]
     (.bindBuffer gl-context target buffer)

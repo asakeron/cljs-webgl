@@ -12,6 +12,6 @@
     :builds {:debug {:source-paths ["src-cljs"]
                      :compiler {:output-to "target/cljs-webgl.js"}}
              :release {:source-paths ["src-cljs"]
-                     :compiler {:output-to "target/cljs-webgl.min.js"
-                                :optimizations :advanced
-                                :pretty-print false}}}})
+                       :compiler {:output-to "target/cljs-webgl.min.js"
+                                 :optimizations :advanced
+                                 :pretty-print false}}}})
