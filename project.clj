@@ -3,7 +3,8 @@
   :url "https://github.com/Asakeron/cljs-webgl"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojurescript "0.0-2080"]]
+  :dependencies [[org.clojure/clojurescript "0.0-2080"]
+                 [org.clojure/core.match "0.2.0"]]
   :source-paths ["src/cljs"]
   :plugins [[lein-cljsbuild "1.0.1-SNAPSHOT"]
             [lein-marginalia "0.7.1"]]

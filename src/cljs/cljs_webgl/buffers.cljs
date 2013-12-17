@@ -1,4 +1,8 @@
-(ns cljs-webgl.buffers)
+(ns cljs-webgl.buffers
+  (:require-macros [cljs.core.match.macros :refer [match]])
+  (:require [cljs.core.match]
+            [cljs-webgl.typed-arrays :as ta]
+            [cljs-webgl.shaders :as shaders]))
 
 (defn create-buffer
   "Creates a new buffer with initialized `data`. 
@@ -16,37 +20,63 @@
 
 (defn draw-arrays
   [gl-context shader buffer target vertex-attrib-array draw-type vertex-type vertex-index components-per-vertex vertex-normalized vertex-stride vertex-offset num-vertices uniforms]
-  (let [set-uniform 
-        (fn [uniform]
-        
-          (defmulti set-specific-uniform (fn [uniform-location values] 
-                                             [(.-length values) (type values)]))
-            
-          (defmethod set-specific-uniform [1 js/Float32Array] [uniform-location values]
-            (.uniform1fv gl-context uniform-location values))
-          
-          (defmethod set-specific-uniform [2 js/Float32Array] [uniform-location values]
-            (.uniform2fv gl-context uniform-location values))
-            
-          (defmethod set-specific-uniform [3 js/Float32Array] [uniform-location values]
-            (.uniform3fv gl-context uniform-location values))
-          
-          (defmethod set-specific-uniform [4 js/Float32Array] [uniform-location values]
-            (.uniform4fv gl-context uniform-location values))
-
-          (defmethod set-specific-uniform [1 js/Int32Array] [uniform-location values]
-            (.uniform1iv gl-context uniform-location values))
-            
-          (defmethod set-specific-uniform [2 js/Int32Array] [uniform-location values]
-            (.uniform2iv gl-context uniform-location values))
-          
-          (defmethod set-specific-uniform [3 js/Int32Array] [uniform-location values]
-            (.uniform3iv gl-context uniform-location values))
-          
-          (defmethod set-specific-uniform [4 js/Int32Array] [uniform-location values]
-            (.uniform4iv gl-context uniform-location values))
-          
-          (set-specific-uniform (:location uniform) (:values uniform)))]
+  (let
+      [bool->float (fn [val] (if val 1.0 0.0))
+       set-uniform (fn [{name :name
+                         type :type
+                         values :values
+                         transpose :transpose}]
+                     (let [uniform-location (shaders/get-uniform-location gl-context shader name)]
+                       (match [type]
+                              [:bool] (.uniform1fv gl-context 
+                                                   uniform-location 
+                                                   (ta/float32 (map bool->float values)))
+                              [:bvec2] (.uniform2fv gl-context
+                                                    uniform-location
+                                                    (ta/float32 (map bool->float values)))
+                              [:bvec3] (.uniform3fv gl-context
+                                                    uniform-location
+                                                    (ta/float32 (map bool->float values)))
+                              [:bvec4] (.uniform4fv gl-context
+                                                    uniform-location
+                                                    (ta/float (map bool->float values)))
+                              [:float] (.uniform1fv gl-context
+                                                    uniform-location
+                                                    (ta/float32 values))
+                              [:vec2] (.uniform2fv gl-context
+                                                   uniform-location
+                                                   (ta/float32 values))
+                              [:vec3] (.uniform3fv gl-context
+                                                   uniform-location
+                                                   (ta/float32 values))
+                              [:vec4] (.uniform4fv gl-context
+                                                   uniform-location
+                                                   (ta/float32 values))
+                              [:int] (.uniform1iv gl-context
+                                                  uniform-location
+                                                  (ta/int32 values))
+                              [:ivec2] (.uniform2iv gl-context
+                                                    uniform-location
+                                                    (ta/int32 values))
+                              [:ivec3] (.uniform3iv gl-context
+                                                    uniform-location
+                                                    (ta/int32 values))
+                              [:ivec4] (.uniform4iv gl-context
+                                                    uniform-location
+                                                    (ta/int32 values))
+                              [:mat2] (.uniformMatrix2fv gl-context
+                                                         uniform-location
+                                                         transpose
+                                                         (ta/float32 values))
+                              [:mat3] (.uniformMatrix3fv gl-context
+                                                         uniform-location
+                                                         transpose
+                                                         (ta/float32 values))
+                              [:mat4] (.uniformMatrix4fv gl-context
+                                                         uniform-location
+                                                         transpose
+                                                         (ta/float32 values))
+                              :else nil)))]
     (.useProgram gl-context shader)
     (dorun (map #(set-uniform %) uniforms))
     (.bindBuffer gl-context target buffer)
