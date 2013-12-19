@@ -2,6 +2,7 @@
   (:require-macros [cljs.core.match.macros :refer [match]])
   (:require [cljs.core.match]
             [cljs-webgl.typed-arrays :as ta]
+            [cljs-webgl.constants :as constants]
             [cljs-webgl.shaders :as shaders]))
 
 (defn create-buffer
@@ -18,8 +19,13 @@
     (.bufferData gl-context target data usage)
     buffer))
 
-(defn draw-arrays
-  [gl-context shader buffer target vertex-attrib-array draw-type vertex-type vertex-index components-per-vertex vertex-normalized vertex-stride vertex-offset num-vertices uniforms]
+(defn clear-color-buffer
+  [gl-context red green blue alpha]
+  (.clearColor gl-context red green blue alpha)
+  (.clear gl-context constants/color-buffer-bit))
+
+(defn draw!
+  [gl-context shader vertex-array  uniforms element-array]
   (let
       [bool->float (fn [val] (if val 1.0 0.0))
        set-uniform (fn [{name :name
@@ -79,7 +85,12 @@
                               :else nil)))]
     (.useProgram gl-context shader)
     (dorun (map #(set-uniform %) uniforms))
-    (.bindBuffer gl-context target buffer)
-    (.enableVertexAttribArray gl-context vertex-attrib-array)
-    (.vertexAttribPointer gl-context vertex-index components-per-vertex vertex-type vertex-normalized vertex-stride vertex-offset)
-    (.drawArrays gl-context draw-type 0 num-vertices)))
+    (.bindBuffer gl-context constants/array-buffer (:buffer vertex-array))
+    (.enableVertexAttribArray gl-context (:attrib-array vertex-array))
+    (.vertexAttribPointer gl-context (:attrib-array vertex-array) (:components-per-vertex vertex-array)
+                          (:type vertex-array) (:normalized? vertex-array) (:stride vertex-array) (:offset vertex-array))
+    (if (nil? element-array)
+      (.drawArrays gl-context (:mode vertex-array) (:first vertex-array) (:count vertex-array))
+      ((fn []
+         (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array)) 
+         (.drawElements gl-context (:mode vertex-array) (:count element-array) (:type element-array) (:offset element-array)))))))
