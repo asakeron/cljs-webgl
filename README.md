@@ -10,50 +10,63 @@ Example
 ----
 
 ```clojure
-(ns cljs-webgl-triangle.core
+(ns basic-opengl-program.core
   (:require [cljs-webgl.context :as context]
             [cljs-webgl.shaders :as shaders]
             [cljs-webgl.constants :as constants]
             [cljs-webgl.buffers :as buffers]
             [cljs-webgl.typed-arrays :as ta]))
 
+(def vertex-shader-source
+  "attribute vec3 vertex_position;
+   void main() {
+     gl_Position = vec4(vertex_position, 1);
+   }")
+
+(def fragment-shader-source
+  "uniform int frame;
+   void main() {
+     gl_FragColor.r = sin(float(frame) * 0.05) / 2.0 + 0.5;
+     gl_FragColor.g = sin(float(frame) * 0.1) / 2.0 + 0.5;
+     gl_FragColor.b = sin(float(frame) * 0.02) / 2.0 + 0.5;
+     gl_FragColor.a = 1.0;
+   }")
+
 (let
-    [element (.getElementById js/document "canvas-demo")
-     gl (context/get-context element)
-     fragment-shader (shaders/create-shader gl
-                                            constants/fragment-shader
-                                            (.-innerHTML (.getElementById
-					    		  js/document
-							  "fragment-shader")))
-     vertex-shader (shaders/create-shader gl
-                                          constants/vertex-shader
-                                          (.-innerHTML (.getElementById
-							js/document
-							"vertex-shader")))
-     shader-program (shaders/create-program gl [vertex-shader
-                                                fragment-shader])
-     triangle-buffer (buffers/create-buffer gl
-                                            (ta/float32 [0.0 1.0
-                                                         -1.0 -1.0
-                                                         1.0 -1.0])
-                                            constants/array-buffer
-                                            constants/static-draw)]
-  (buffers/draw-arrays gl
-                       shader-program
-                       triangle-buffer
-                       constants/array-buffer
-                       (shaders/get-attrib-location gl
-                                                    shader-program
-                                                    "vertex_position")
-                       constants/triangles
-                       constants/float
-                       0
-                       2
-                       false
-                       0
-                       0
-                       3
-                       [{:name "color" :type :vec4 :values [1.0 0.0 0.0 1.0]}]))
+    [gl (context/get-context (.getElementById js/document "canvas"))
+     shader (shaders/create-program gl [(shaders/create-shader gl constants/vertex-shader vertex-shader-source)
+                                        (shaders/create-shader gl constants/fragment-shader fragment-shader-source)])
+     vertex-buffer (buffers/create-buffer gl (ta/float32 [1.0 1.0 0.0
+                                                          -1.0 1.0 0.0
+                                                          1.0 -1.0 0.0])
+                                          constants/array-buffer
+                                          constants/static-draw)
+     element-buffer (buffers/create-buffer gl (ta/unsigned-int16 [0 1 2])
+                                           constants/element-array-buffer
+                                           constants/static-draw)
+     draw (fn [frame continue]
+            (buffers/clear-color-buffer gl 0 0 0 1)
+            (buffers/draw! gl
+                           shader
+                           {:buffer vertex-buffer
+                            :attrib-array (shaders/get-attrib-location gl
+                                                                       shader
+                                                                       "vertex_position")
+                            :mode constants/triangles
+                            :first 0
+                            :count 3
+                            :components-per-vertex 3
+                            :type constants/float
+                            :normalized? false
+                            :stride 0
+                            :offset 0}
+                           [{:name "frame" :type :int :values [frame]}]
+                           {:buffer element-buffer
+                            :count 3
+                            :type constants/unsigned-short
+                            :offset 0})
+            (.requestAnimationFrame js/window (fn [time-elapsed] (continue (inc frame) continue))))]
+  (.requestAnimationFrame js/window (fn [time-elapsed] (draw 0 draw))))
 ```
 
 Dependency information
@@ -62,7 +75,7 @@ Dependency information
 [Leiningen](http://github.com/technomancy/leiningen/) dependency information:
 
 ```
-[cljs-webgl "0.1.3-SNAPSHOT"]
+[cljs-webgl "0.1.4-SNAPSHOT"]
 ```
 
 Documentation

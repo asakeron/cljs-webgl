@@ -1,4 +1,4 @@
-(defproject cljs-webgl "0.1.3-SNAPSHOT"
+(defproject cljs-webgl "0.1.4-SNAPSHOT"
   :description "WebGL binding to ClojureScript"
   :url "https://github.com/Asakeron/cljs-webgl"
   :license {:name "Eclipse Public License"
