@@ -10,9 +10,15 @@
 
   `data` must be a typed-array
 
-  `target` may be `array-buffer` or `element-array-buffer`
+  `target` may be `cljs-webgl.constants/array-buffer` or `cljs-webgl.constants/element-array-buffer`
 
-  `usage` may be `static-draw` or `dynamic-draw`"
+  `usage` may be `cljs-webgl.constants/static-draw` or `cljs-webgl.constants/dynamic-draw`
+
+  Relevant OpenGL ES reference pages:
+  
+  * [glGenBuffers(Similar to createBuffer)](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenBuffers.xml)
+  * [glBindBuffer](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glBindBuffer.xml)
+  * [glBufferData](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferData.xml)"
   [gl-context data target usage]
   (let [buffer (.createBuffer gl-context)]
     (.bindBuffer gl-context target buffer)
@@ -20,12 +26,40 @@
     buffer))
 
 (defn clear-color-buffer
+  "Clears the color buffer with specified `red`, `green`, `blue` and `alpha` values.
+  
+  Relevant OpenGL ES reference pages:
+  
+  * [glClearStencil](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearStencil.xml)
+  * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context red green blue alpha]
   (.clearColor gl-context red green blue alpha)
   (.clear gl-context constants/color-buffer-bit))
 
+(defn clear-depth-buffer
+  "Clears the depth buffer with specified `depth` value.
+
+  Relevant OpenGL ES reference pages:
+
+  * [glClearStencil](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearStencil.xml)
+  * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
+  [gl-context depth]
+  (.clearDepth gl-context depth)
+  (.clear gl-context constants/depth-buffer-bit))
+
+(defn clear-stencil-buffer
+  "Clears the stencil buffer with specified `index` value.
+
+  Relevant OpenGL ES reference pages:
+
+  * [glClearStencil](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearStencil.xml)
+  * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
+  [gl-context index]
+  (.clearStencil gl-context index)
+  (.clear gl-context constants/stencil-buffer-bit))
+
 (defn draw!
-  [gl-context shader vertex-array  uniforms element-array]
+  [gl-context shader vertex-array uniforms element-array]
   (let
       [bool->float (fn [val] (if val 1.0 0.0))
        set-uniform (fn [{name :name
