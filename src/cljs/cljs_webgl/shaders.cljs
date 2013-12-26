@@ -110,10 +110,19 @@
   (.getUniformLocation gl-context shader-program uniform-name))
 
 (defn is-shader?
-  "Returns wheter a given `shader-program` is valid.
+  "Returns whether a given shader object is valid.
 
   Relevant OpenGL ES reference pages:
 
-  * [glGetUniformLocation](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetUniformLocation.xml)"
+  * [glIsShader](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glIsShader.xml)"
+  [gl-context shader]
+  (.isShader gl-context shader))
+
+(defn is-program?
+  "Returns whether a given shader program is valid.
+
+  Relevant OpenGL ES reference pages:
+
+  * [glIsProgram] (http://www.khronos.org/opengles/sdk/docs/man/xhtml/glIsProgram.xml)"
   [gl-context shader-program]
-  (.isShader gl-context shader-program))
+  (.isProgram gl-context shader-program))
