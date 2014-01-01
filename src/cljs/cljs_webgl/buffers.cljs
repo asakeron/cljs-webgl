@@ -6,7 +6,7 @@
             [cljs-webgl.shaders :as shaders]))
 
 (defn create-buffer
-  "Creates a new buffer with initialized `data`. 
+  "Creates a new buffer with initialized `data`.
 
   `data` must be a typed-array
 
@@ -15,7 +15,7 @@
   `usage` may be `cljs-webgl.constants/static-draw` or `cljs-webgl.constants/dynamic-draw`
 
   Relevant OpenGL ES reference pages:
-  
+
   * [glGenBuffers(Similar to createBuffer)](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenBuffers.xml)
   * [glBindBuffer](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glBindBuffer.xml)
   * [glBufferData](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferData.xml)"
@@ -27,9 +27,9 @@
 
 (defn clear-color-buffer
   "Clears the color buffer with specified `red`, `green`, `blue` and `alpha` values.
-  
+
   Relevant OpenGL ES reference pages:
-  
+
   * [glClearStencil](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearStencil.xml)
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context red green blue alpha]
@@ -59,7 +59,7 @@
   (.clear gl-context constants/stencil-buffer-bit))
 
 (defn draw!
-  [gl-context shader vertex-array uniforms element-array]
+  [gl-context shader draw-mode first count attributes uniforms element-array]
   (let
       [bool->float (fn [val] (if val 1.0 0.0))
        set-uniform (fn [{name :name
@@ -68,8 +68,8 @@
                          transpose :transpose}]
                      (let [uniform-location (shaders/get-uniform-location gl-context shader name)]
                        (match [type]
-                              [:bool] (.uniform1fv gl-context 
-                                                   uniform-location 
+                              [:bool] (.uniform1fv gl-context
+                                                   uniform-location
                                                    (ta/float32 (map bool->float values)))
                               [:bvec2] (.uniform2fv gl-context
                                                     uniform-location
@@ -116,15 +116,23 @@
                                                          uniform-location
                                                          transpose
                                                          (ta/float32 values))
-                              :else nil)))]
+                              :else nil)))
+       set-attribute (fn [{buffer :buffer
+                           location :location
+                           components-per-vertex :components-per-vertex
+                           type :type
+                           normalized? :normalized?
+                           stride :stride
+                           offset :offset}]
+                       (.bindBuffer gl-context constants/array-buffer buffer)
+                       (.enableVertexAttribArray gl-context location)
+                       (.vertexAttribPointer gl-context location components-per-vertex type normalized? stride offset))]
     (.useProgram gl-context shader)
-    (dorun (map #(set-uniform %) uniforms))
-    (.bindBuffer gl-context constants/array-buffer (:buffer vertex-array))
-    (.enableVertexAttribArray gl-context (:attrib-array vertex-array))
-    (.vertexAttribPointer gl-context (:attrib-array vertex-array) (:components-per-vertex vertex-array)
-                          (:type vertex-array) (:normalized? vertex-array) (:stride vertex-array) (:offset vertex-array))
+    (dorun (map set-uniform uniforms))
+    (dorun (map set-attribute attributes))
     (if (nil? element-array)
-      (.drawArrays gl-context (:mode vertex-array) (:first vertex-array) (:count vertex-array))
+      (.drawArrays gl-context draw-mode first count)
       ((fn []
-         (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array)) 
-         (.drawElements gl-context (:mode vertex-array) (:count element-array) (:type element-array) (:offset element-array)))))))
+         (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array))
+         (.drawElements gl-context draw-mode count (:type element-array) (:offset element-array)))))
+    (dorun (map (fn [{location :location}] (.disableVertexAttribArray gl-context location)) attributes))))
