@@ -86,4 +86,4 @@ Dependency information
 
 Documentation
 ----
-For generating the documentation, run `lein marg src-cljs`.
+For generating the documentation, run `lein marg src/cljs`.
