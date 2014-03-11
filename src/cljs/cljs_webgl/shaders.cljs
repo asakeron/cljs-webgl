@@ -6,7 +6,7 @@
   The valid values for `type` are `cljs-webgl.constants/vertex-shader` and `cljs-webgl.constants/fragment-shader`.
 
   Relevant OpenGL ES reference pages:
-  
+
   * [glCreateShader](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateShader.xml)
   * [glShaderSource](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glShaderSource.xml)
   * [glCompileShader](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glCompileShader.xml)"
@@ -20,7 +20,7 @@
   "Returns a linked shader program composed of the compiled shader objects specified by the `shaders` parameter.
 
   Relevant OpenGL ES reference pages:
-  
+
   * [glCreateProgram](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateProgram.xml)
   * [glAttachShader](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glAttachShader.xml)
   * [glLinkProgram](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glLinkProgram.xml)"
@@ -34,7 +34,7 @@
   "Returns a lazy sequence of shader objects attached to a given shader `program`.
 
   Relevant OpenGL ES reference pages:
-  
+
   * [glGetAttachedShaders](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetAttachedShaders.xml)"
   [gl-context program]
   (lazy-seq (.getAttachedShaders gl-context program)))
@@ -59,9 +59,9 @@
 
 (defn get-shader-parameter
   "Returns the value of a given `parameter` in a `shader` object.
-  
+
   Valid values for `parameter` are `cljs-webgl.constants/shader-type`, `cljs-webgl.constants/compile-status` and `cljs-webgl.constants/delete-status`.
-  
+
   Relevant OpenGL ES reference pages:
 
   * [glGetShaderiv(similar to getShaderParameter)](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetShaderiv.xml)"
@@ -76,7 +76,7 @@
      :range-max
      :precision}
 
-  Valid values for `shader-type` are `cljs-webgl.constants/fragment-shader` and `cljs-webgl.constants/vertex-shader`. 
+  Valid values for `shader-type` are `cljs-webgl.constants/fragment-shader` and `cljs-webgl.constants/vertex-shader`.
 
   Valid values for `precision type` are `cljs-webgl.constants/low-float`, `cljs-webgl.constants/medium-float`,
   `cljs-webgl.constants/high-float`, `cljs-webgl.constants/low-int`, `cljs-webgl.constants/medium-int`
@@ -92,7 +92,7 @@
      :precision (.-precision js-obj)}))
 
 (defn get-attrib-location
-  "Returns the attribute - specified by it's name` - location in a given `shader-program`.
+  "Returns the attribute - specified by it's name - location in a given `shader-program`.
 
   Relevant OpenGL ES reference pages:
 
@@ -101,7 +101,7 @@
   (.getAttribLocation gl-context shader-program attrib-name))
 
 (defn get-uniform-location
-  "Returns the uniform - specified by it's name` - location in a given `shader-program`.
+  "Returns the uniform - specified by it's name - location in a given `shader-program`.
 
   Relevant OpenGL ES reference pages:
 
@@ -123,6 +123,6 @@
 
   Relevant OpenGL ES reference pages:
 
-  * [glIsProgram] (http://www.khronos.org/opengles/sdk/docs/man/xhtml/glIsProgram.xml)"
+  * [glIsProgram](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glIsProgram.xml)"
   [gl-context shader-program]
   (.isProgram gl-context shader-program))
