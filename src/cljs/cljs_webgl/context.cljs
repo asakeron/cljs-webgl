@@ -1,10 +1,10 @@
-;; Contains functions for querying information from a WebGL context. 
+;; Contains functions for querying information from a WebGL context.
 (ns cljs-webgl.context)
 
 (defn get-context
   "Gets a WebGL context from a canvas element.
 `context-attributes` may be a map in the following form:
-         
+
     {:alpha
      :depth
      :stencil
@@ -15,7 +15,7 @@ If you don't specify any key, the default value is assumed.
 
 For further information on context creation parameters see [WebGLContextAttributes](https://www.khronos.org/registry/webgl/specs/1.0.2/#WEBGLCONTEXTATTRIBUTES);"
   ([canvas-element]
-     (.getContext canvas-element "experimental-webgl"))
+     (get-context canvas-element {}))
   ([canvas-element context-attributes]
      (let [default-attributes {:alpha true
                                :depth true,
@@ -23,16 +23,18 @@ For further information on context creation parameters see [WebGLContextAttribut
                                :antialias true,
                                :premultiplied-alpha true,
                                :preserve-drawing-buffer false}
-           attributes->js (fn
-                            [{alpha :alpha depth :depth stencil :stencil antialias :antialias
-                              premultiplied-alpha :premultiplied-alpha preserve-drawing-buffer :preserve-drawing-buffer}]
-                            (clj->js {:alpha alpha,
-                                      :depth depth,
-                                      :stencil stencil,
-                                      :antialias antialias,
-                                      :premultipliedAplha premultiplied-alpha,
-                                      :preserveDrawingBuffer preserve-drawing-buffer}))]
-       (.getContext canvas-element "experimental-webgl" (attributes->js (merge default-attributes context-attributes))))))
+           attributes->js (fn [{:keys [alpha depth stencil antialias premultiplied-alpha preserve-drawing-buffer]}]
+                            (clj->js
+                              {:alpha alpha,
+                               :depth depth,
+                               :stencil stencil,
+                               :antialias antialias,
+                               :premultipliedAlpha premultiplied-alpha,
+                               :preserveDrawingBuffer preserve-drawing-buffer}))
+           opts (attributes->js (merge default-attributes context-attributes))]
+       (or
+         (.getContext canvas-element "experimental-webgl" opts)
+         (.getContext canvas-element "webgl" opts)))))
 
 (defn get-context-attributes
   "Returns the actual context parameters for a created context. The returned map has the following form:
