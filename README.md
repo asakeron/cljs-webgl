@@ -8,6 +8,11 @@ Create a library that allows a more convinient functional style for creating Web
 
 Example
 ----
+The program below can be run by first building:
+
+    $ lein cljsbuild once
+
+And then opening the `examples/index.html` page in a webGL capable browser.
 
 ```clojure
 (ns basic-opengl-program.core
