@@ -1,20 +1,3 @@
-cljs-webgl
-----
-WebGL binding to ClojureScript.
-
-Goal
-----
-Create a library that allows a more convinient functional style for creating WebGL applications in ClojureScript, by means of hiding mutability where possible and wrapping every Javascript value in ClojureScript constructs.
-
-Example
-----
-The program below can be run by first building:
-
-    $ lein cljsbuild once
-
-And then opening the `examples/index.html` page in a webGL capable browser.
-
-```clojure
 (ns basic-opengl-program.core
   (:require [cljs-webgl.context :as context]
             [cljs-webgl.shaders :as shaders]
@@ -78,17 +61,3 @@ And then opening the `examples/index.html` page in a webGL capable browser.
 
             (.requestAnimationFrame js/window (fn [time-elapsed] (continue (inc frame) continue))))]
   (.requestAnimationFrame js/window (fn [time-elapsed] (draw 0 draw))))
-```
-
-Dependency information
-----
-
-[Leiningen](http://github.com/technomancy/leiningen/) dependency information:
-
-```
-[cljs-webgl "0.1.4-SNAPSHOT"]
-```
-
-Documentation
-----
-For generating the documentation, run `lein marg src/cljs`.

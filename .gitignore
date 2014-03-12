@@ -11,4 +11,6 @@ pom.xml.asc
 .lein-plugins
 .lein-repl-history
 *~
-\#*\#
+\#*\#/
+/.nrepl-port
+/docs/uberdoc.html

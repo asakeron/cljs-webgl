@@ -30,7 +30,7 @@
 
   Relevant OpenGL ES reference pages:
 
-  * [glClearStencil](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearStencil.xml)
+  * [glClearColor](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearColor.xml)
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context red green blue alpha]
   (.clearColor gl-context red green blue alpha)
@@ -41,7 +41,7 @@
 
   Relevant OpenGL ES reference pages:
 
-  * [glClearStencil](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearStencil.xml)
+  * [glClearDepthf](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClearDepthf.xml)
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context depth]
   (.clearDepth gl-context depth)
@@ -62,10 +62,7 @@
   [gl-context shader draw-mode first count attributes uniforms element-array]
   (let
       [bool->float (fn [val] (if val 1.0 0.0))
-       set-uniform (fn [{name :name
-                         type :type
-                         values :values
-                         transpose :transpose}]
+       set-uniform (fn [{:keys [name type values transpose]}]
                      (let [uniform-location (shaders/get-uniform-location gl-context shader name)]
                        (match [type]
                               [:bool] (.uniform1fv gl-context
@@ -117,13 +114,7 @@
                                                          transpose
                                                          (ta/float32 values))
                               :else nil)))
-       set-attribute (fn [{buffer :buffer
-                           location :location
-                           components-per-vertex :components-per-vertex
-                           type :type
-                           normalized? :normalized?
-                           stride :stride
-                           offset :offset}]
+       set-attribute (fn [{:keys [buffer location components-per-vertex type normalized? stride offset]}]
                        (.bindBuffer gl-context constants/array-buffer buffer)
                        (.enableVertexAttribArray gl-context location)
                        (.vertexAttribPointer gl-context location components-per-vertex type normalized? stride offset))]
@@ -132,7 +123,7 @@
     (dorun (map set-attribute attributes))
     (if (nil? element-array)
       (.drawArrays gl-context draw-mode first count)
-      ((fn []
-         (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array))
-         (.drawElements gl-context draw-mode count (:type element-array) (:offset element-array)))))
-    (dorun (map (fn [{location :location}] (.disableVertexAttribArray gl-context location)) attributes))))
+      (do
+        (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array))
+        (.drawElements gl-context draw-mode count (:type element-array) (:offset element-array))))
+    (dorun (map (fn [{:keys [location]}] (.disableVertexAttribArray gl-context location)) attributes))))
