@@ -1,34 +1,17 @@
-(ns cljs-webgl.shaders)
+(ns cljs-webgl.shaders
+  (:require
+    [cljs-webgl.constants :as const]))
 
-(defn create-shader
-  "Returns a compiled vertex or fragment shader - specified by the `type` parameter -, object for a given `source`.
+(defn get-program-parameter
+  "Returns the value of a given `parameter` in a `program` object.
 
-  The valid values for `type` are `cljs-webgl.constants/vertex-shader` and `cljs-webgl.constants/fragment-shader`.
-
-  Relevant OpenGL ES reference pages:
-
-  * [glCreateShader](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateShader.xml)
-  * [glShaderSource](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glShaderSource.xml)
-  * [glCompileShader](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glCompileShader.xml)"
-  [gl-context type source]
-  (let [shader (.createShader gl-context type)]
-    (.shaderSource gl-context shader source)
-    (.compileShader gl-context shader)
-    shader))
-
-(defn create-program
-  "Returns a linked shader program composed of the compiled shader objects specified by the `shaders` parameter.
+  Valid values for `parameter` are `cljs-webgl.constants/validate-status`, `cljs-webgl.constants/link-status` and `cljs-webgl.constants/delete-status`.
 
   Relevant OpenGL ES reference pages:
 
-  * [glCreateProgram](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateProgram.xml)
-  * [glAttachShader](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glAttachShader.xml)
-  * [glLinkProgram](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glLinkProgram.xml)"
-  [gl-context shaders]
-  (let [program (.createProgram gl-context)]
-    (dorun (map (fn [shader] (.attachShader gl-context program shader)) shaders))
-    (.linkProgram gl-context program)
-    program))
+  * [glGetProgramiv (similar to getProgramParameter)](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetProgramiv.xml)"
+  [gl-context program parameter]
+  (.getProgramParameter gl-context program parameter))
 
 (defn get-attached-shaders
   "Returns a lazy sequence of shader objects attached to a given shader `program`.
@@ -126,3 +109,78 @@
   * [glIsProgram](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glIsProgram.xml)"
   [gl-context shader-program]
   (.isProgram gl-context shader-program))
+
+(defn create-shader
+  "Returns a compiled vertex or fragment shader object (specified by the `type` parameter)
+   for a given `source`. If the shader cannot be compiled successfully, an error is thrown.
+
+  The valid values for `type` are `cljs-webgl.constants/vertex-shader` and `cljs-webgl.constants/fragment-shader`.
+
+  Relevant OpenGL ES reference pages:
+
+  * [glCreateShader](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateShader.xml)
+  * [glShaderSource](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glShaderSource.xml)
+  * [glCompileShader](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glCompileShader.xml)"
+  [gl-context type source]
+  (let [shader (.createShader gl-context type)]
+    (.shaderSource gl-context shader source)
+    (.compileShader gl-context shader)
+
+    (when-not (get-shader-parameter gl-context shader const/compile-status)
+      (throw (js/Error. (get-shader-info-log gl-context shader))))
+
+    shader))
+
+
+(defn ^:private text-content
+  "Grabs the text content of the element's children"
+  [element]
+  (loop [child (.-firstChild element)
+         text  ""]
+    (if (nil? child)
+      text
+      (recur
+        (.-nextSibling child)
+        (str
+          text
+          (when (= (.-nodeType child) 3) ; 3=TEXT_NODE
+            (.-textContent child)))))))
+
+(def ^:private mime-type
+  "Mapping of mime/type to relevant GL constant"
+  {"x-shader/x-fragment" const/fragment-shader
+   "x-shader/x-vertex"   const/vertex-shader})
+
+(defn get-shader
+  "Returns a compiled vertext or fragment shader, loaded from the script-id"
+  [gl-context script-id]
+  (when-let [script (.getElementById js/document script-id)]
+      (create-shader
+        gl-context
+        (mime-type (.-type script))
+        (text-content script))))
+
+(defn create-program
+  "Returns a linked shader program composed of the compiled shader objects
+   specified by the `shaders` parameter. Throws an error if the program was
+   not linked successfully.
+
+  Relevant OpenGL ES reference pages:
+
+  * [glCreateProgram](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glCreateProgram.xml)
+  * [glAttachShader](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glAttachShader.xml)
+  * [glLinkProgram](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glLinkProgram.xml)"
+  [gl-context & shaders]
+  (let [program (.createProgram gl-context)]
+
+    (doseq [shader shaders]
+      (.attachShader gl-context program shader))
+
+    (.linkProgram gl-context program)
+
+    (when-not (get-program-parameter gl-context program const/link-status)
+      (throw (js/Error. "Could not initialize shaders")))
+
+    (.useProgram gl-context program)
+    program))
+

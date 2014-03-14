@@ -37,10 +37,12 @@ And then opening the `examples/index.html` page in a webGL capable browser.
      gl_FragColor.a = 1.0;
    }")
 
-(let
+(defn start []
+  (let
     [gl (context/get-context (.getElementById js/document "canvas"))
-     shader (shaders/create-program gl [(shaders/create-shader gl constants/vertex-shader vertex-shader-source)
-                                        (shaders/create-shader gl constants/fragment-shader fragment-shader-source)])
+     shader (shaders/create-program gl
+              (shaders/create-shader gl constants/vertex-shader vertex-shader-source)
+              (shaders/create-shader gl constants/fragment-shader fragment-shader-source))
      vertex-buffer (buffers/create-buffer gl (ta/float32 [1.0 1.0 0.0
                                                           -1.0 1.0 0.0
                                                           1.0 -1.0 0.0])
@@ -77,7 +79,7 @@ And then opening the `examples/index.html` page in a webGL capable browser.
                             :offset 0})
 
             (.requestAnimationFrame js/window (fn [time-elapsed] (continue (inc frame) continue))))]
-  (.requestAnimationFrame js/window (fn [time-elapsed] (draw 0 draw))))
+  (.requestAnimationFrame js/window (fn [time-elapsed] (draw 0 draw)))))
 ```
 
 Dependency information

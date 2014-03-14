@@ -11,7 +11,7 @@
   :cljsbuild {
     :builds {
       :examples {
-        :source-paths ["src/cljs" "examples"]
+        :source-paths ["src/cljs" "examples/src"]
         :incremental? true
         :compiler {
           :output-to "target/example.js"

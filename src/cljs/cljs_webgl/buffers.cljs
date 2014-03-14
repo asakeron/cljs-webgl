@@ -23,6 +23,8 @@
   (let [buffer (.createBuffer gl-context)]
     (.bindBuffer gl-context target buffer)
     (.bufferData gl-context target data usage)
+    (set! (.-itemSize buffer) 3)
+    (set! (.-numItems buffer) (quot (.-length data) 3))
     buffer))
 
 (defn clear-color-buffer
