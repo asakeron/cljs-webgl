@@ -34,7 +34,8 @@
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context red green blue alpha]
   (.clearColor gl-context red green blue alpha)
-  (.clear gl-context constants/color-buffer-bit))
+  (.clear gl-context constants/color-buffer-bit)
+  gl-context)
 
 (defn clear-depth-buffer
   "Clears the depth buffer with specified `depth` value.
@@ -45,7 +46,8 @@
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context depth]
   (.clearDepth gl-context depth)
-  (.clear gl-context constants/depth-buffer-bit))
+  (.clear gl-context constants/depth-buffer-bit)
+  gl-context)
 
 (defn clear-stencil-buffer
   "Clears the stencil buffer with specified `index` value.
@@ -56,7 +58,8 @@
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context index]
   (.clearStencil gl-context index)
-  (.clear gl-context constants/stencil-buffer-bit))
+  (.clear gl-context constants/stencil-buffer-bit)
+  gl-context)
 
 (defn draw!
   [gl-context shader draw-mode first count attributes uniforms element-array]
@@ -126,4 +129,5 @@
       (do
         (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array))
         (.drawElements gl-context draw-mode count (:type element-array) (:offset element-array))))
-    (dorun (map (fn [{:keys [location]}] (.disableVertexAttribArray gl-context location)) attributes))))
+    (dorun (map (fn [{:keys [location]}] (.disableVertexAttribArray gl-context location)) attributes))
+    gl-context))
