@@ -155,10 +155,10 @@
   "Returns a compiled vertext or fragment shader, loaded from the script-id"
   [gl-context script-id]
   (when-let [script (.getElementById js/document script-id)]
-      (create-shader
-        gl-context
-        (mime-type (.-type script))
-        (text-content script))))
+    (create-shader
+      gl-context
+      (mime-type (.-type script))
+      (text-content script))))
 
 (defn create-program
   "Returns a linked shader program composed of the compiled shader objects

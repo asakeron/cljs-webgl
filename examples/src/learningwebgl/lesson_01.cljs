@@ -53,6 +53,8 @@
         ; draw-mode
         const/triangles
 
+        ; TODO -- below params not yet defined
+
         0 ; first
         3 ; count
 
