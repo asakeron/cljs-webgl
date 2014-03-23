@@ -1,9 +1,8 @@
 (ns cljs-webgl.buffers
-  (:require-macros [cljs.core.match.macros :refer [match]])
-  (:require [cljs.core.match]
-            [cljs-webgl.typed-arrays :as ta]
-            [cljs-webgl.constants :as constants]
-            [cljs-webgl.shaders :as shaders]))
+  (:require
+    [cljs-webgl.typed-arrays :as ta]
+    [cljs-webgl.constants :as constants]
+    [cljs-webgl.shaders :as shaders]))
 
 (defn create-buffer
   "Creates a new buffer with initialized `data`.
@@ -63,73 +62,68 @@
   (.clear gl-context constants/stencil-buffer-bit)
   gl-context)
 
+(defn ^:private bool->float
+  [x]
+  (if x 1.0 0.0))
+
+(defn ^:private set-uniform
+  [gl-context shader {:keys [name type values transpose]}]
+  (let [uniform-location (shaders/get-uniform-location gl-context shader name)]
+    (case type
+      :bool   (.uniform1fv gl-context uniform-location (ta/float32 (map bool->float values)))
+      :bvec2  (.uniform2fv gl-context uniform-location (ta/float32 (map bool->float values)))
+      :bvec3  (.uniform3fv gl-context uniform-location (ta/float32 (map bool->float values)))
+      :bvec4  (.uniform4fv gl-context uniform-location (ta/float (map bool->float values)))
+      :float  (.uniform1fv gl-context uniform-location (ta/float32 values))
+      :vec2   (.uniform2fv gl-context uniform-location (ta/float32 values))
+      :vec3   (.uniform3fv gl-context uniform-location (ta/float32 values))
+      :vec4   (.uniform4fv gl-context uniform-location (ta/float32 values))
+      :int    (.uniform1iv gl-context uniform-location (ta/int32 values))
+      :ivec2  (.uniform2iv gl-context uniform-location (ta/int32 values))
+      :ivec3  (.uniform3iv gl-context uniform-location (ta/int32 values))
+      :ivec4  (.uniform4iv gl-context uniform-location (ta/int32 values))
+      :mat2   (.uniformMatrix2fv gl-context uniform-location transpose (ta/float32 values))
+      :mat3   (.uniformMatrix3fv gl-context uniform-location transpose (ta/float32 values))
+      :mat4   (.uniformMatrix4fv gl-context uniform-location transpose (ta/float32 values))
+      nil)))
+
+(defn ^:private set-attribute
+  [gl-context {:keys [buffer location components-per-vertex type normalized? stride offset]}]
+  (.bindBuffer
+    gl-context
+    constants/array-buffer
+    buffer)
+
+  (.enableVertexAttribArray
+    gl-context
+    location)
+
+  (.vertexAttribPointer
+    gl-context
+    location
+    (or components-per-vertex (.-itemSize buffer))
+    (or type constants/float)
+    (or  normalized? false)
+    (or stride 0)
+    (or offset 0)))
+
 (defn draw!
   [gl-context shader draw-mode first count attributes uniforms element-array]
-  (let
-      [bool->float (fn [val] (if val 1.0 0.0))
-       set-uniform (fn [{:keys [name type values transpose]}]
-                     (let [uniform-location (shaders/get-uniform-location gl-context shader name)]
-                       (match [type]
-                              [:bool] (.uniform1fv gl-context
-                                                   uniform-location
-                                                   (ta/float32 (map bool->float values)))
-                              [:bvec2] (.uniform2fv gl-context
-                                                    uniform-location
-                                                    (ta/float32 (map bool->float values)))
-                              [:bvec3] (.uniform3fv gl-context
-                                                    uniform-location
-                                                    (ta/float32 (map bool->float values)))
-                              [:bvec4] (.uniform4fv gl-context
-                                                    uniform-location
-                                                    (ta/float (map bool->float values)))
-                              [:float] (.uniform1fv gl-context
-                                                    uniform-location
-                                                    (ta/float32 values))
-                              [:vec2] (.uniform2fv gl-context
-                                                   uniform-location
-                                                   (ta/float32 values))
-                              [:vec3] (.uniform3fv gl-context
-                                                   uniform-location
-                                                   (ta/float32 values))
-                              [:vec4] (.uniform4fv gl-context
-                                                   uniform-location
-                                                   (ta/float32 values))
-                              [:int] (.uniform1iv gl-context
-                                                  uniform-location
-                                                  (ta/int32 values))
-                              [:ivec2] (.uniform2iv gl-context
-                                                    uniform-location
-                                                    (ta/int32 values))
-                              [:ivec3] (.uniform3iv gl-context
-                                                    uniform-location
-                                                    (ta/int32 values))
-                              [:ivec4] (.uniform4iv gl-context
-                                                    uniform-location
-                                                    (ta/int32 values))
-                              [:mat2] (.uniformMatrix2fv gl-context
-                                                         uniform-location
-                                                         transpose
-                                                         (ta/float32 values))
-                              [:mat3] (.uniformMatrix3fv gl-context
-                                                         uniform-location
-                                                         transpose
-                                                         (ta/float32 values))
-                              [:mat4] (.uniformMatrix4fv gl-context
-                                                         uniform-location
-                                                         transpose
-                                                         (ta/float32 values))
-                              :else nil)))
-       set-attribute (fn [{:keys [buffer location components-per-vertex type normalized? stride offset]}]
-                       (.bindBuffer gl-context constants/array-buffer buffer)
-                       (.enableVertexAttribArray gl-context location)
-                       (.vertexAttribPointer gl-context location components-per-vertex type normalized? stride offset))]
-    (.useProgram gl-context shader)
-    (dorun (map set-uniform uniforms))
-    (dorun (map set-attribute attributes))
-    (if (nil? element-array)
-      (.drawArrays gl-context draw-mode first count)
-      (do
-        (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array))
-        (.drawElements gl-context draw-mode count (:type element-array) (:offset element-array))))
-    (dorun (map (fn [{:keys [location]}] (.disableVertexAttribArray gl-context location)) attributes))
-    gl-context))
+  (.useProgram gl-context shader)
+
+  (doseq [u uniforms]
+    (set-uniform gl-context shader u))
+
+  (doseq [a attributes]
+    (set-attribute gl-context a))
+
+  (if (nil? element-array)
+    (.drawArrays gl-context draw-mode first count)
+    (do
+      (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array))
+      (.drawElements gl-context draw-mode count (:type element-array) (:offset element-array))))
+
+  (doseq [a attributes]
+    (.disableVertexAttribArray gl-context (:location a)))
+
+  gl-context)
