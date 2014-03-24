@@ -13,17 +13,20 @@
 
   `usage` may be `cljs-webgl.constants/static-draw` or `cljs-webgl.constants/dynamic-draw`
 
+  `item-size` [optional] will set the item size as an attribute on the buffer, and the calculate the number of items accordingly.
+
   Relevant OpenGL ES reference pages:
 
   * [glGenBuffers(Similar to createBuffer)](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glGenBuffers.xml)
   * [glBindBuffer](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glBindBuffer.xml)
   * [glBufferData](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glBufferData.xml)"
-  [gl-context data target usage]
+  [gl-context data target usage & [item-size]]
   (let [buffer (.createBuffer gl-context)]
     (.bindBuffer gl-context target buffer)
     (.bufferData gl-context target data usage)
-    (set! (.-itemSize buffer) 3)
-    (set! (.-numItems buffer) (quot (.-length data) 3))
+    (when item-size
+      (set! (.-itemSize buffer) item-size)
+      (set! (.-numItems buffer) (quot (.-length data) item-size)))
     buffer))
 
 (defn clear-color-buffer
@@ -103,7 +106,7 @@
     location
     (or components-per-vertex (.-itemSize buffer))
     (or type constants/float)
-    (or  normalized? false)
+    (or normalized? false)
     (or stride 0)
     (or offset 0)))
 
