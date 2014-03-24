@@ -16,6 +16,8 @@
         :compiler {
           :output-to "target/example.js"
           :source-map "target/example.map"
-          :foreign-libs [{:file "resources/js/gl-matrix-min.js" :provides ["mat4"]}]
+          :foreign-libs [
+            {:file "resources/js/gl-matrix-min.js" :provides ["mat4","mat3"]}
+            {:file "resources/js/webgl-utils.js" :provides ["WebGLUtils"]}]
           :static-fns true
           :pretty-print true }}}})
