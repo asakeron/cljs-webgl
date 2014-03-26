@@ -77,7 +77,7 @@ And then opening the `examples/index.html` page in a webGL capable browser.
   (.requestAnimationFrame js/window (fn [time-elapsed] (draw 0 draw)))))
 ```
 
-More working examples (clojurescript implementations of (Learning WebGL)[http://learningwebgl.com/blog/?page_id=1217])
+More working examples (clojurescript implementations of [Learning WebGL](http://learningwebgl.com/blog/?page_id=1217))
 can be found in the examples directory.
 
 Dependency information
