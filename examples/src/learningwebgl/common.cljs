@@ -36,3 +36,13 @@
   (let [m (mat4/create)]
     (mat4/identity m)
     (mat4/translate m m (clj->js v))))
+
+(defn deg->rad [degrees]
+  (/ (* degrees Math/PI) 180))
+
+(defn animate [draw-fn]
+  (letfn [(loop [frame]
+            (fn []
+              (.requestAnimFrame  js/window (loop (inc frame)))
+              (draw-fn frame)))]
+    ((loop 0))))
