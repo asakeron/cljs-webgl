@@ -54,32 +54,31 @@ And then opening the `examples/index.html` page in a webGL capable browser.
      draw (fn [frame continue]
             (-> gl
                 (buffers/clear-color-buffer 0 0 0 1)
-                (buffers/draw! shader ; shader
-                               constants/triangles  ; draw-mode
-                               0 ; first
-                               3 ; count
+                (buffers/draw! :shader shader
+                               :draw-mode constants/triangles
+                               :count 3
 
-                               ; attributes
+                               :attributes
                                [{:buffer vertex-buffer
                                  :location (shaders/get-attrib-location gl shader "vertex_position")
                                  :components-per-vertex 3
-                                 :type constants/float
-                                 :normalized? false
-                                 :stride 0
-                                 :offset 0}]
-                               ; uniforms
+                                 :type constants/float}]
+
+                               :uniforms
                                [{:name "frame" :type :int :values [frame]}]
 
-                               ;element array
+                               :element-array
                                {:buffer element-buffer
                                 :count 3
                                 :type constants/unsigned-short
                                 :offset 0}))
 
             (.requestAnimationFrame js/window (fn [time-elapsed] (continue (inc frame) continue))))]
-    (.requestAnimationFrame js/window (fn [time-elapsed] (draw 0 draw)))))
-
+  (.requestAnimationFrame js/window (fn [time-elapsed] (draw 0 draw)))))
 ```
+
+More working examples (clojurescript implementations of (Learning WebGL)[http://learningwebgl.com/blog/?page_id=1217])
+can be found in the examples directory.
 
 Dependency information
 ----

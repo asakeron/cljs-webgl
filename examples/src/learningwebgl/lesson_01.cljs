@@ -3,6 +3,7 @@
     [mat4]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer draw!]]
     [cljs-webgl.context :refer [get-context]]
+    [cljs-webgl.misc :refer [enable]]
     [cljs-webgl.shaders :refer [get-shader create-program get-attrib-location]]
     [cljs-webgl.constants :as const]
     [cljs-webgl.typed-arrays :as ta]))
@@ -62,46 +63,22 @@
         vertex-position-attribute (get-attrib-location gl shader-prog "aVertexPosition")]
 
     (clear-color-buffer gl 0.0 0.0 0.0 1.0)
-    (.enable gl const/depth-test)
+    (enable gl const/depth-test)
 
     (draw!
       gl
-      shader-prog
-
-      ; draw-mode
-      const/triangles
-
-      0 ; first
-      (.-numItems triangle-vertex-buffer) ; count
-
-      ; attributes
-      [{:buffer triangle-vertex-buffer
-        :location vertex-position-attribute}]
-
-      ; uniforms
-      [{:name "uPMatrix" :type :mat4 :values (get-perspective-matrix gl)}
-       {:name "uMVMatrix" :type :mat4 :values (get-position-matrix [-1.5 0.0 -7.0])}]
-
-      ;element-array
-      nil)
+      :shader shader-prog
+      :draw-mode const/triangles
+      :count (.-numItems triangle-vertex-buffer)
+      :attributes [{:buffer triangle-vertex-buffer :location vertex-position-attribute}]
+      :uniforms [{:name "uPMatrix" :type :mat4 :values (get-perspective-matrix gl)}
+                 {:name "uMVMatrix" :type :mat4 :values (get-position-matrix [-1.5 0.0 -7.0])}])
 
     (draw!
       gl
-      shader-prog
-
-      ; draw-mode
-      const/triangle-strip
-
-      0 ; first
-      (.-numItems square-vertex-buffer) ; count
-
-      ; attributes
-      [{:buffer square-vertex-buffer
-        :location vertex-position-attribute}]
-
-      ; uniforms
-      [{:name "uPMatrix" :type :mat4 :values (get-perspective-matrix gl)}
-       {:name "uMVMatrix" :type :mat4 :values (get-position-matrix [1.5 0.0 -7.0])}]
-
-      ;element-array
-      nil)))
+      :shader shader-prog
+      :draw-mode const/triangle-strip
+      :count (.-numItems square-vertex-buffer)
+      :attributes [{:buffer square-vertex-buffer :location vertex-position-attribute}]
+      :uniforms [{:name "uPMatrix" :type :mat4 :values (get-perspective-matrix gl)}
+                 {:name "uMVMatrix" :type :mat4 :values (get-position-matrix [1.5 0.0 -7.0])}])))

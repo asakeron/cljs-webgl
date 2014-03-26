@@ -111,7 +111,9 @@
     (or offset 0)))
 
 (defn draw!
-  [gl-context shader draw-mode first count attributes uniforms element-array]
+  [gl-context & {:keys [shader draw-mode first count attributes
+                        uniforms element-array] :as opts}]
+
   (.useProgram gl-context shader)
 
   (doseq [u uniforms]
@@ -121,7 +123,7 @@
     (set-attribute gl-context a))
 
   (if (nil? element-array)
-    (.drawArrays gl-context draw-mode first count)
+    (.drawArrays gl-context draw-mode (or first 0) count)
     (do
       (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array))
       (.drawElements gl-context draw-mode count (:type element-array) (:offset element-array))))
