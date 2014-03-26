@@ -6,7 +6,7 @@
                                   get-position-matrix deg->rad animate]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer clear-depth-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
-    [cljs-webgl.misc :refer [enable]]
+    [cljs-webgl.misc :refer [capabilities]]
     [cljs-webgl.constants :as const]
     [cljs-webgl.typed-arrays :as ta]))
 
@@ -62,7 +62,7 @@
         perspective-matrix (get-perspective-matrix gl)
         one-degree (deg->rad 1)]
 
-    (enable gl const/depth-test)
+    (capabilities gl {const/depth-test true})
 
     (animate
       (fn [frame] ; frame is not used

@@ -2,6 +2,7 @@
   (:require
     [cljs-webgl.typed-arrays :as ta]
     [cljs-webgl.constants :as constants]
+    [cljs-webgl.misc :as misc]
     [cljs-webgl.shaders :as shaders]))
 
 (defn create-buffer
@@ -112,7 +113,7 @@
 
 (defn draw!
   [gl-context & {:keys [shader draw-mode first count attributes
-                        uniforms element-array] :as opts}]
+                        uniforms element-array capabilities] :as opts}]
 
   (.useProgram gl-context shader)
 
@@ -121,6 +122,9 @@
 
   (doseq [a attributes]
     (set-attribute gl-context a))
+
+  (when capabilities
+    (misc/capabilities gl-context capabilities))
 
   (if (nil? element-array)
     (.drawArrays gl-context draw-mode (or first 0) count)

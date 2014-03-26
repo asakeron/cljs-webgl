@@ -3,7 +3,7 @@
     [mat4]
     [learningwebgl.common :refer [init-gl init-shaders get-perspective-matrix get-position-matrix]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer draw!]]
-    [cljs-webgl.misc :refer [enable]]
+    [cljs-webgl.misc :refer [capabilities]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
     [cljs-webgl.constants :as const]
     [cljs-webgl.typed-arrays :as ta]))
@@ -34,12 +34,12 @@
         vertex-position-attribute (get-attrib-location gl shader-prog "aVertexPosition")]
 
     (clear-color-buffer gl 0.0 0.0 0.0 1.0)
-    (enable gl const/depth-test)
 
     (draw!
       gl
       :shader shader-prog
       :draw-mode const/triangles
+      :capabilities {const/depth-test true}
       :count (.-numItems triangle-vertex-buffer)
       :attributes [{:buffer triangle-vertex-buffer :location vertex-position-attribute}]
       :uniforms [{:name "uPMatrix" :type :mat4 :values (get-perspective-matrix gl)}

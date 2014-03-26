@@ -1,27 +1,9 @@
 (ns cljs-webgl.misc)
 
-(defn enable
-  "Enables GL capabilities
+(defn capabilities
+  "Enables/disables GL capabilities
 
-   `capabilities` is a list of capabilities that are bitwise-OR'd together.
-
-   The valid values for each capability are: `cljs-webgl.constants/blend`,
-   `cljs-webgl.constants/cull-face`, `cljs-webgl.constants/depth-test`, `cljs-webgl.constants/dither`,
-   `cljs-webgl.constants/polygon-offset-fill`, `cljs-webgl.constants/sample-alpha-to-coverage`,
-   `cljs-webgl.constants/scissor-test`, `cljs-webgl.constants/stensil-test`
-
-   Relevant OpenGL ES reference pages:
-
-   * [glEnable](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glEnable.xml)"
-  [gl-context & capabilities]
-  (.enable gl-context (apply bit-or capabilities))
-  gl-context)
-
-
-(defn disable
-  "Disables GL capabilities
-
-   `capabilities` is a list of capabilities that are bitwise-OR'd together.
+   `capabilities-map` is a mapping of capabilities->true/false to enable/disable specific GL capabilities.
 
    The valid values for each capability are: `cljs-webgl.constants/blend`,
    `cljs-webgl.constants/cull-face`, `cljs-webgl.constants/depth-test`, `cljs-webgl.constants/dither`,
@@ -30,9 +12,13 @@
 
    Relevant OpenGL ES reference pages:
 
+   * [glEnable](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glEnable.xml)
    * [glDisable](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glDisable.xml)"
-  [gl-context & capabilities]
-  (.disable gl-context (apply bit-or capabilities))
+  [gl-context capabilities-map]
+  (doseq [[capability enabled?] capabilities-map]
+    (if enabled?
+      (.enable gl-context capability)
+      (.disable gl-context capability)))
   gl-context)
 
 

@@ -3,7 +3,6 @@
     [mat4]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer draw!]]
     [cljs-webgl.context :refer [get-context]]
-    [cljs-webgl.misc :refer [enable]]
     [cljs-webgl.shaders :refer [get-shader create-program get-attrib-location]]
     [cljs-webgl.constants :as const]
     [cljs-webgl.typed-arrays :as ta]))
