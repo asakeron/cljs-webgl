@@ -2,7 +2,6 @@
   (:require
     [cljs-webgl.typed-arrays :as ta]
     [cljs-webgl.constants :as constants]
-    [cljs-webgl.misc :as misc]
     [cljs-webgl.shaders :as shaders]))
 
 (defn create-buffer
@@ -128,6 +127,37 @@
    (shaders/get-uniform-location gl-context shader name)
     0)) ; TODO: probably want to parameterize this
 
+(def ^:private default-capabilities
+  {constants/blend                    false
+   constants/cull-face                false
+   constants/depth-test               false
+   constants/dither                   true
+   constants/polygon-offset-fill      false
+   constants/sample-alpha-to-coverage false
+   constants/sample-coverage          false
+   constants/scissor-test             false
+   constants/stencil-test             false})
+
+(defn ^:private set-capability
+  "Enables/disables acording to `enabled?` a given server-side GL `capability`
+
+   The valid values for `capability` are: `cljs-webgl.constants/blend`,
+   `cljs-webgl.constants/cull-face`, `cljs-webgl.constants/depth-test`, `cljs-webgl.constants/dither`,
+   `cljs-webgl.constants/polygon-offset-fill`, `cljs-webgl.constants/sample-alpha-to-coverage`,
+   `cljs-webgl.constants/sample-coverage`, `cljs-webgl.constants/scissor-test`,
+   `cljs-webgl.constants/stencil-test`
+
+   Relevant OpenGL ES reference pages:
+
+   * [glEnable](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glEnable.xml)
+   * [glDisable](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glDisable.xml)"
+  [gl-context capability enabled?]
+
+  (if enabled?
+    (.enable gl-context capability)
+    (.disable gl-context capability))
+  gl-context)
+
 (defn draw!
   [gl-context & {:keys [shader draw-mode first count attributes
                         uniforms textures element-array capabilities] :as opts}]
@@ -143,8 +173,8 @@
   (doseq [t textures]
     (set-texture gl-context shader t))
 
-  (when capabilities
-    (misc/capabilities gl-context capabilities))
+  (doseq [[capability enabled?] (merge default-capabilities capabilities)]
+    (set-capability gl-context capability enabled?))
 
   (if (nil? element-array)
     (.drawArrays gl-context draw-mode (or first 0) count)
