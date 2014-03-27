@@ -111,9 +111,26 @@
     (or stride 0)
     (or offset 0)))
 
+(defn ^:private set-texture
+  [gl-context shader {:keys [texture name]}]
+
+  (.activeTexture
+    gl-context
+    constants/texture0) ; TODO: probably want to parameterize this
+
+  (.bindTexture
+    gl-context
+    constants/texture-2d ; TODO: probably want to parameterize this
+    texture)
+
+  (.uniform1i
+    gl-context
+   (shaders/get-uniform-location gl-context shader name)
+    0)) ; TODO: probably want to parameterize this
+
 (defn draw!
   [gl-context & {:keys [shader draw-mode first count attributes
-                        uniforms element-array capabilities] :as opts}]
+                        uniforms textures element-array capabilities] :as opts}]
 
   (.useProgram gl-context shader)
 
@@ -122,6 +139,9 @@
 
   (doseq [a attributes]
     (set-attribute gl-context a))
+
+  (doseq [t textures]
+    (set-texture gl-context shader t))
 
   (when capabilities
     (misc/capabilities gl-context capabilities))

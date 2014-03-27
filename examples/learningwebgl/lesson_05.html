@@ -1,0 +1,47 @@
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="author" content="Richard Hull">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>WebGL Lesson 5 &ndash; introducing textures</title>
+    </head>
+    <body>
+        <h1>WebGL Lesson 5 &ndash; introducing textures</h1>
+        <canvas id="canvas" style="border:none" width="500" height="500"></canvas>
+        <p>
+        A clojurescript implementation of <a href="http://learningwebgl.com/blog/?p=507">http://learningwebgl.com/blog/?p=507</a>
+
+        <script type="text/javascript" src="../../target/example.js"></script>
+        <script id="shader-fs" type="x-shader/x-fragment">
+            precision mediump float;
+
+            varying vec2 vTextureCoord;
+
+            uniform sampler2D uSampler;
+
+            void main(void) {
+                gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+            }
+        </script>
+
+        <script id="shader-vs" type="x-shader/x-vertex">
+            attribute vec3 aVertexPosition;
+            attribute vec2 aTextureCoord;
+
+            uniform mat4 uMVMatrix;
+            uniform mat4 uPMatrix;
+
+            varying vec2 vTextureCoord;
+
+
+            void main(void) {
+                gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+                vTextureCoord = aTextureCoord;
+            }
+        </script>
+
+        <script type="text/javascript">
+          learningwebgl.lesson_05.start();
+        </script>
+    </body>
+</html>
