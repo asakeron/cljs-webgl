@@ -47,5 +47,6 @@
                              constants/texture-2d
                              nil)))
 
+    (set! (.-crossOrigin img) "anonymous")
     (set! (.-src img) url)
     texture))
