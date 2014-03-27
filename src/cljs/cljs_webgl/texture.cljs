@@ -8,7 +8,7 @@
    and the returned texture will not immediately be fully initialized."
   [gl-context url]
   (let [texture (.createTexture gl-context)
-        img (js/Image)]
+        img (js/Image.)]
 
     (set! (.-onload img) (fn []
                            (.bindTexture
