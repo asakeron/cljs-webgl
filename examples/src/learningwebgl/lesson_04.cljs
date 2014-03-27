@@ -6,7 +6,6 @@
                                   get-position-matrix deg->rad animate]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer clear-depth-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
-    [cljs-webgl.misc :refer [capabilities]]
     [cljs-webgl.constants :as const]
     [cljs-webgl.typed-arrays :as ta]))
 
@@ -173,8 +172,6 @@
         perspective-matrix (get-perspective-matrix gl)
         one-degree (deg->rad 1)]
 
-    (capabilities gl {const/depth-test true})
-
     (animate
       (fn [frame] ; frame is not used
 
@@ -208,7 +205,8 @@
           :attributes [{:buffer pyramid-vertex-position-buffer :location vertex-position-attribute}
                        {:buffer pyramid-vertex-color-buffer :location vertex-color-attribute}]
           :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
-                     {:name "uMVMatrix" :type :mat4 :values pyramid-matrix}])
+                     {:name "uMVMatrix" :type :mat4 :values pyramid-matrix}]
+          :capabilities {const/depth-test true})
 
         (draw!
           gl
@@ -219,4 +217,5 @@
                        {:buffer cube-vertex-color-buffer :location vertex-color-attribute}]
           :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
                      {:name "uMVMatrix" :type :mat4 :values cube-matrix}]
-          :element-array {:buffer cube-vertex-indices :type const/unsigned-short :offset 0})))))
+          :element-array {:buffer cube-vertex-indices :type const/unsigned-short :offset 0}
+          :capabilities {const/depth-test true})))))

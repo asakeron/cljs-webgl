@@ -3,7 +3,6 @@
     [mat4]
     [learningwebgl.common :refer [init-gl init-shaders get-perspective-matrix get-position-matrix]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer draw!]]
-    [cljs-webgl.misc :refer [capabilities]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
     [cljs-webgl.constants :as const]
     [cljs-webgl.typed-arrays :as ta]))

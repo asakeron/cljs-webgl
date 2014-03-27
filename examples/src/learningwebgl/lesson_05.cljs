@@ -6,7 +6,6 @@
                                   get-position-matrix deg->rad animate]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer clear-depth-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
-    [cljs-webgl.misc :refer [capabilities]]
     [cljs-webgl.constants :as const]
     [cljs-webgl.texture :refer [load-texture]]
     [cljs-webgl.typed-arrays :as ta]))
@@ -122,9 +121,6 @@
         perspective-matrix (get-perspective-matrix gl)
         two-degrees (deg->rad 2)]
 
-
-    (capabilities gl {const/depth-test true})
-
     (animate
       (fn [frame] ; frame is not used
 
@@ -148,4 +144,5 @@
           :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
                      {:name "uMVMatrix" :type :mat4 :values cube-matrix}]
           :textures [{:name "uSampler" :texture nehe-texture}]
-          :element-array {:buffer cube-vertex-indices :type const/unsigned-short :offset 0})))))
+          :element-array {:buffer cube-vertex-indices :type const/unsigned-short :offset 0}
+          :capabilities {const/depth-test true})))))
