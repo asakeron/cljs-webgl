@@ -48,7 +48,7 @@
                                  :type constants/float}]
 
                                :uniforms
-                               [{:name "frame" :type :int :values [frame]}]
+                               [{:name "frame" :type :int :values (ta/int32 [frame])}]
 
                                :element-array
                                {:buffer element-buffer
