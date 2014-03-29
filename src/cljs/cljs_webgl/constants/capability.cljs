@@ -1,0 +1,11 @@
+(ns cljs-webgl.constants.capability)
+
+(def cull-face                0x0B44)
+(def blend                    0x0BE2)
+(def dither                   0x0BD0)
+(def stencil-test             0x0B90)
+(def depth-test               0x0B71)
+(def scissor-test             0x0C11)
+(def polygon-offset-fill      0x8037)
+(def sample-alpha-to-coverage 0x809E)
+(def sample-coverage          0x80A0)

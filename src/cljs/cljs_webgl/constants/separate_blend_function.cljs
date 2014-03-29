@@ -1,0 +1,11 @@
+(ns cljs-webgl.constants.separate-blend-function)
+
+(def blend-dst-rgb            0x80C8)
+(def blend-src-rgb            0x80C9)
+(def blend-dst-alpha          0x80CA)
+(def blend-src-alpha          0x80CB)
+(def constant-color           0x8001)
+(def one-minus-constant-color 0x8002)
+(def constant-alpha           0x8003)
+(def one-minus-constant-alpha 0x8004)
+(def blend-color              0x8005)
