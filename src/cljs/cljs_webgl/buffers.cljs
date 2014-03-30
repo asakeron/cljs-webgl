@@ -1,7 +1,12 @@
 (ns cljs-webgl.buffers
   (:require
     [cljs-webgl.typed-arrays :as ta]
-    [cljs-webgl.constants :as constants]
+    [cljs-webgl.constants.capability :as capability]
+    [cljs-webgl.constants.clear-buffer-mask :as clear-buffer]
+    [cljs-webgl.constants.buffer-object :as buffer-object]
+    [cljs-webgl.constants.texture-target :as texture-target]
+    [cljs-webgl.constants.texture-unit :as texture-unit]
+    [cljs-webgl.constants.data-type :as data-type]
     [cljs-webgl.shaders :as shaders]))
 
 (defn create-buffer
@@ -9,9 +14,9 @@
 
   `data` must be a typed-array
 
-  `target` may be `cljs-webgl.constants/array-buffer` or `cljs-webgl.constants/element-array-buffer`
+  `target` may be `cljs-webgl.constants.buffer-object/array-buffer` or `cljs-webgl.constants.buffer-object/element-array-buffer`
 
-  `usage` may be `cljs-webgl.constants/static-draw` or `cljs-webgl.constants/dynamic-draw`
+  `usage` may be `cljs-webgl.constants.buffer-object/static-draw` or `cljs-webgl.constants.buffer-object/dynamic-draw`
 
   `item-size` [optional] will set the item size as an attribute on the buffer, and the calculate the number of items accordingly.
 
@@ -38,7 +43,7 @@
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context red green blue alpha]
   (.clearColor gl-context red green blue alpha)
-  (.clear gl-context constants/color-buffer-bit)
+  (.clear gl-context clear-buffer/color-buffer-bit)
   gl-context)
 
 (defn clear-depth-buffer
@@ -50,7 +55,7 @@
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context depth]
   (.clearDepth gl-context depth)
-  (.clear gl-context constants/depth-buffer-bit)
+  (.clear gl-context clear-buffer/depth-buffer-bit)
   gl-context)
 
 (defn clear-stencil-buffer
@@ -62,7 +67,7 @@
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context index]
   (.clearStencil gl-context index)
-  (.clear gl-context constants/stencil-buffer-bit)
+  (.clear gl-context clear-buffer/stencil-buffer-bit)
   gl-context)
 
 (defn ^:private set-uniform
@@ -90,7 +95,7 @@
   [gl-context {:keys [buffer location components-per-vertex type normalized? stride offset]}]
   (.bindBuffer
     gl-context
-    constants/array-buffer
+    buffer-object/array-buffer
     buffer)
 
   (.enableVertexAttribArray
@@ -101,7 +106,7 @@
     gl-context
     location
     (or components-per-vertex (.-itemSize buffer))
-    (or type constants/float)
+    (or type data-type/float)
     (or normalized? false)
     (or stride 0)
     (or offset 0)))
@@ -111,11 +116,11 @@
 
   (.activeTexture
     gl-context
-    constants/texture0) ; TODO: probably want to parameterize this
+    texture-unit/texture0) ; TODO: probably want to parameterize this
 
   (.bindTexture
     gl-context
-    constants/texture-2d ; TODO: probably want to parameterize this
+    texture-target/texture-2d ; TODO: probably want to parameterize this
     texture)
 
   (.uniform1i
@@ -124,24 +129,24 @@
     0)) ; TODO: probably want to parameterize this
 
 (def ^:private default-capabilities
-  {constants/blend                    false
-   constants/cull-face                false
-   constants/depth-test               false
-   constants/dither                   true
-   constants/polygon-offset-fill      false
-   constants/sample-alpha-to-coverage false
-   constants/sample-coverage          false
-   constants/scissor-test             false
-   constants/stencil-test             false})
+  {capability/blend                    false
+   capability/cull-face                false
+   capability/depth-test               false
+   capability/dither                   true
+   capability/polygon-offset-fill      false
+   capability/sample-alpha-to-coverage false
+   capability/sample-coverage          false
+   capability/scissor-test             false
+   capability/stencil-test             false})
 
 (defn ^:private set-capability
   "Enables/disables acording to `enabled?` a given server-side GL `capability`
 
-   The valid values for `capability` are: `cljs-webgl.constants/blend`,
-   `cljs-webgl.constants/cull-face`, `cljs-webgl.constants/depth-test`, `cljs-webgl.constants/dither`,
-   `cljs-webgl.constants/polygon-offset-fill`, `cljs-webgl.constants/sample-alpha-to-coverage`,
-   `cljs-webgl.constants/sample-coverage`, `cljs-webgl.constants/scissor-test`,
-   `cljs-webgl.constants/stencil-test`
+   The valid values for `capability` are: `cljs-webgl.constants.capability/blend`,
+   `cljs-webgl.constants.capability/cull-face`, `cljs-webgl.constants.capability/depth-test`, `cljs-webgl.constants.capability/dither`,
+   `cljs-webgl.constants.capability/polygon-offset-fill`, `cljs-webgl.constants.capability/sample-alpha-to-coverage`,
+   `cljs-webgl.constants.capability/sample-coverage`, `cljs-webgl.constants.capability/scissor-test`,
+   `cljs-webgl.constants.capability/stencil-test`
 
    Relevant OpenGL ES reference pages:
 
@@ -175,7 +180,7 @@
   (if (nil? element-array)
     (.drawArrays gl-context draw-mode (or first 0) count)
     (do
-      (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array))
+      (.bindBuffer gl-context clear-buffer/element-array-buffer (:buffer element-array))
       (.drawElements gl-context draw-mode count (:type element-array) (:offset element-array))))
 
   (doseq [a attributes]
