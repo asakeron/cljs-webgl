@@ -18,7 +18,10 @@ And then opening the `examples/index.html` page in a webGL capable browser.
 (ns basic-opengl-program.core
   (:require [cljs-webgl.context :as context]
             [cljs-webgl.shaders :as shaders]
-            [cljs-webgl.constants :as constants]
+            [cljs-webgl.constants.draw-mode :as draw-mode]
+            [cljs-webgl.constants.data-type :as data-type]
+            [cljs-webgl.constants.buffer-object :as buffer-object]
+            [cljs-webgl.constants.shader :as shader]
             [cljs-webgl.buffers :as buffers]
             [cljs-webgl.typed-arrays :as ta]))
 
@@ -41,28 +44,28 @@ And then opening the `examples/index.html` page in a webGL capable browser.
   (let
     [gl (context/get-context (.getElementById js/document "canvas"))
      shader (shaders/create-program gl
-              (shaders/create-shader gl constants/vertex-shader vertex-shader-source)
-              (shaders/create-shader gl constants/fragment-shader fragment-shader-source))
+              (shaders/create-shader gl shader/vertex-shader vertex-shader-source)
+              (shaders/create-shader gl shader/fragment-shader fragment-shader-source))
      vertex-buffer (buffers/create-buffer gl (ta/float32 [1.0 1.0 0.0
                                                           -1.0 1.0 0.0
                                                           1.0 -1.0 0.0])
-                                          constants/array-buffer
-                                          constants/static-draw)
+                                          buffer-object/array-buffer
+                                          buffer-object/static-draw)
      element-buffer (buffers/create-buffer gl (ta/unsigned-int16 [0 1 2])
-                                           constants/element-array-buffer
-                                           constants/static-draw)
+                                           buffer-object/element-array-buffer
+                                           buffer-object/static-draw)
      draw (fn [frame continue]
             (-> gl
                 (buffers/clear-color-buffer 0 0 0 1)
                 (buffers/draw! :shader shader
-                               :draw-mode constants/triangles
+                               :draw-mode draw-mode/triangles
                                :count 3
 
                                :attributes
                                [{:buffer vertex-buffer
                                  :location (shaders/get-attrib-location gl shader "vertex_position")
                                  :components-per-vertex 3
-                                 :type constants/float}]
+                                 :type data-type/float}]
 
                                :uniforms
                                [{:name "frame" :type :int :values (ta/int32 [frame])}]
@@ -70,11 +73,12 @@ And then opening the `examples/index.html` page in a webGL capable browser.
                                :element-array
                                {:buffer element-buffer
                                 :count 3
-                                :type constants/unsigned-short
+                                :type data-type/unsigned-short
                                 :offset 0}))
 
             (.requestAnimationFrame js/window (fn [time-elapsed] (continue (inc frame) continue))))]
   (.requestAnimationFrame js/window (fn [time-elapsed] (draw 0 draw)))))
+
 ```
 
 More working examples (clojurescript implementations of [Learning WebGL](http://learningwebgl.com/blog/?page_id=1217))

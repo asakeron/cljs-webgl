@@ -6,7 +6,10 @@
                                   get-position-matrix deg->rad animate]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer clear-depth-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
-    [cljs-webgl.constants :as const]
+    [cljs-webgl.constants.buffer-object :as buffer-object]
+    [cljs-webgl.constants.capability :as capability]
+    [cljs-webgl.constants.draw-mode :as draw-mode]
+    [cljs-webgl.constants.data-type :as data-type]
     [cljs-webgl.texture :refer [load-texture]]
     [cljs-webgl.typed-arrays :as ta]))
 
@@ -55,8 +58,8 @@
                                   -1.0, -1.0,  1.0,
                                   -1.0,  1.0,  1.0,
                                   -1.0,  1.0, -1.0])
-                      const/array-buffer
-                      const/static-draw
+                      buffer-object/array-buffer
+                      buffer-object/static-draw
                       3)
 
         cube-vertex-texture-coords-buffer
@@ -97,8 +100,8 @@
                                   1.0, 0.0,
                                   1.0, 1.0,
                                   0.0, 1.0, ])
-                      const/array-buffer
-                      const/static-draw
+                      buffer-object/array-buffer
+                      buffer-object/static-draw
                       2)
 
         cube-vertex-indices
@@ -110,8 +113,8 @@
                                   12, 13, 14,   12, 14, 15,   ; Bottom face
                                   16, 17, 18,   16, 18, 19,   ; Right face
                                   20, 21, 22,   20, 22, 23])  ; Left face
-                      const/element-array-buffer
-                      const/static-draw
+                      buffer-object/element-array-buffer
+                      buffer-object/static-draw
                       1)
 
         cube-matrix (get-position-matrix [ 0.0 0.0 -5.0])
@@ -137,12 +140,12 @@
         (draw!
           gl
           :shader shader-prog
-          :draw-mode const/triangles
+          :draw-mode draw-mode/triangles
           :count (.-numItems cube-vertex-indices)
           :attributes [{:buffer cube-vertex-position-buffer :location vertex-position-attribute}
                        {:buffer cube-vertex-texture-coords-buffer :location texture-coord-attribute}]
           :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
                      {:name "uMVMatrix" :type :mat4 :values cube-matrix}]
           :textures [{:name "uSampler" :texture nehe-texture}]
-          :element-array {:buffer cube-vertex-indices :type const/unsigned-short :offset 0}
-          :capabilities {const/depth-test true})))))
+          :element-array {:buffer cube-vertex-indices :type data-type/unsigned-short :offset 0}
+          :capabilities {capability/depth-test true})))))

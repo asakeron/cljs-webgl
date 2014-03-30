@@ -4,7 +4,9 @@
     [learningwebgl.common :refer [init-gl init-shaders get-perspective-matrix get-position-matrix]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
-    [cljs-webgl.constants :as const]
+    [cljs-webgl.constants.buffer-object :as buffer-object]
+    [cljs-webgl.constants.capability :as capability]
+    [cljs-webgl.constants.draw-mode :as draw-mode]
     [cljs-webgl.typed-arrays :as ta]))
 
 (defn start []
@@ -16,8 +18,8 @@
                       (ta/float32 [ 0.0,  1.0,  0.0,
                                    -1.0, -1.0,  0.0,
                                     1.0, -1.0,  0.0 ])
-                      const/array-buffer
-                      const/static-draw
+                      buffer-object/array-buffer
+                      buffer-object/static-draw
                       3)
 
         square-vertex-buffer
@@ -26,8 +28,8 @@
                                    -1.0,  1.0,  0.0,
                                     1.0, -1.0,  0.0,
                                    -1.0, -1.0,  0.0])
-                      const/array-buffer
-                      const/static-draw
+                      buffer-object/array-buffer
+                      buffer-object/static-draw
                       3)
 
         vertex-position-attribute (get-attrib-location gl shader-prog "aVertexPosition")]
@@ -37,8 +39,8 @@
     (draw!
       gl
       :shader shader-prog
-      :draw-mode const/triangles
-      :capabilities {const/depth-test true}
+      :draw-mode draw-mode/triangles
+      :capabilities {capability/depth-test true}
       :count (.-numItems triangle-vertex-buffer)
       :attributes [{:buffer triangle-vertex-buffer :location vertex-position-attribute}]
       :uniforms [{:name "uPMatrix" :type :mat4 :values (get-perspective-matrix gl)}
@@ -47,7 +49,8 @@
     (draw!
       gl
       :shader shader-prog
-      :draw-mode const/triangle-strip
+      :draw-mode draw-mode/triangle-strip
+      :capabilities {capability/depth-test true}
       :count (.-numItems square-vertex-buffer)
       :attributes [{:buffer square-vertex-buffer :location vertex-position-attribute}]
       :uniforms [{:name "uPMatrix" :type :mat4 :values (get-perspective-matrix gl)}

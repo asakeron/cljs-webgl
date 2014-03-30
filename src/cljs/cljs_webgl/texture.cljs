@@ -1,6 +1,11 @@
 (ns cljs-webgl.texture
   (:require
-    [cljs-webgl.constants :as constants]))
+    [cljs-webgl.constants.texture-target :as texture-target]
+    [cljs-webgl.constants.texture-parameter-name :as texture-parameter-name]
+    [cljs-webgl.constants.webgl :as webgl]
+    [cljs-webgl.constants.texture-mag-filter :as texture-mag-filter]
+    [cljs-webgl.constants.pixel-format :as pixel-format]
+    [cljs-webgl.constants.data-type :as data-type]))
 
 ; TODO: probably want to parameterize some of the details here
 (defn load-texture
@@ -13,38 +18,38 @@
     (set! (.-onload img) (fn []
                            (.bindTexture
                              gl-context
-                             constants/texture-2d
+                             texture-target/texture-2d
                              texture)
 
                            (.pixelStorei
                              gl-context
-                             constants/unpack-flip-y-webgl
+                             webgl/unpack-flip-y-webgl
                              true)
 
                            (.texImage2D
                              gl-context
-                             constants/texture-2d
+                             texture-target/texture-2d
                              0
-                             constants/rgba
-                             constants/rgba
-                             constants/unsigned-byte
+                             pixel-format/rgba
+                             pixel-format/rgba
+                             data-type/unsigned-byte
                              img)
 
                            (.texParameteri
                              gl-context
-                             constants/texture-2d
-                             constants/texture-mag-filter
-                             constants/nearest)
+                             texture-target/texture-2d
+                             texture-parameter-name/texture-mag-filter
+                             texture-mag-filter/nearest)
 
                            (.texParameteri
                              gl-context
-                             constants/texture-2d
-                             constants/texture-min-filter
-                             constants/nearest)
+                             texture-target/texture-2d
+                             texture-parameter-name/texture-min-filter
+                             texture-mag-filter/nearest)
 
                            (.bindTexture
                              gl-context
-                             constants/texture-2d
+                             texture-target/texture-2d
                              nil)))
 
     (set! (.-crossOrigin img) "anonymous")
