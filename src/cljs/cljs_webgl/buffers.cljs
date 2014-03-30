@@ -180,7 +180,7 @@
   (if (nil? element-array)
     (.drawArrays gl-context draw-mode (or first 0) count)
     (do
-      (.bindBuffer gl-context clear-buffer/element-array-buffer (:buffer element-array))
+      (.bindBuffer gl-context buffer-object/element-array-buffer (:buffer element-array))
       (.drawElements gl-context draw-mode count (:type element-array) (:offset element-array))))
 
   (doseq [a attributes]

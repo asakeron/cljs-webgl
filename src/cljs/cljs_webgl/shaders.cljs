@@ -1,11 +1,11 @@
 (ns cljs-webgl.shaders
-  (:require
-    [cljs-webgl.constants :as const]))
+  (:require [cljs-webgl.constants.shader :as shader]
+            [cljs-webgl.constants.shader-source :as shader-source]))
 
 (defn get-program-parameter
   "Returns the value of a given `parameter` in a `program` object.
 
-  Valid values for `parameter` are `cljs-webgl.constants/validate-status`, `cljs-webgl.constants/link-status` and `cljs-webgl.constants/delete-status`.
+  Valid values for `parameter` are `cljs-webgl.constants.shader/validate-status`, `cljs-webgl.constants.shader/link-status` and `cljs-webgl.constants.shader/delete-status`.
 
   Relevant OpenGL ES reference pages:
 
@@ -43,7 +43,7 @@
 (defn get-shader-parameter
   "Returns the value of a given `parameter` in a `shader` object.
 
-  Valid values for `parameter` are `cljs-webgl.constants/shader-type`, `cljs-webgl.constants/compile-status` and `cljs-webgl.constants/delete-status`.
+  Valid values for `parameter` are `cljs-webgl.constants.shader/shader-type`, `cljs-webgl.constants.shader/compile-status` and `cljs-webgl.constants.shader/delete-status`.
 
   Relevant OpenGL ES reference pages:
 
@@ -59,11 +59,12 @@
      :range-max
      :precision}
 
-  Valid values for `shader-type` are `cljs-webgl.constants/fragment-shader` and `cljs-webgl.constants/vertex-shader`.
+  Valid values for `shader-type` are `cljs-webgl.constants.shader/fragment-shader` and `cljs-webgl.constants.shader/vertex-shader`.
 
-  Valid values for `precision type` are `cljs-webgl.constants/low-float`, `cljs-webgl.constants/medium-float`,
-  `cljs-webgl.constants/high-float`, `cljs-webgl.constants/low-int`, `cljs-webgl.constants/medium-int`
-  and `cljs-webgl.constants/high-int`
+  Valid values for `precision type` are `cljs-webgl.constants.shader-precision-specified-types/low-float`,
+  `cljs-webgl.constants.shader-precision-specified-types/medium-float`,
+  `cljs-webgl.constants.shader-precision-specified-types/high-float`, `cljs-webgl.constants.shader-precision-specified-types/low-int`,
+  `cljs-webgl.constants.shader-precision-specified-types/medium-int` and `cljs-webgl.constants.shader-precision-specified-types/high-int`
 
   Relevant OpenGL ES reference pages:
 
@@ -114,7 +115,7 @@
   "Returns a compiled vertex or fragment shader object (specified by the `type` parameter)
    for a given `source`. If the shader cannot be compiled successfully, an error is thrown.
 
-  The valid values for `type` are `cljs-webgl.constants/vertex-shader` and `cljs-webgl.constants/fragment-shader`.
+  The valid values for `type` are `cljs-webgl.constants.shader/vertex-shader` and `cljs-webgl.constants.shader/fragment-shader`.
 
   Relevant OpenGL ES reference pages:
 
@@ -126,7 +127,7 @@
     (.shaderSource gl-context shader source)
     (.compileShader gl-context shader)
 
-    (when-not (get-shader-parameter gl-context shader const/compile-status)
+    (when-not (get-shader-parameter gl-context shader shader-source/compile-status)
       (throw (js/Error. (get-shader-info-log gl-context shader))))
 
     shader))
@@ -148,8 +149,8 @@
 
 (def ^:private mime-type
   "Mapping of mime/type to relevant GL constant"
-  {"x-shader/x-fragment" const/fragment-shader
-   "x-shader/x-vertex"   const/vertex-shader})
+  {"x-shader/x-fragment" shader/fragment-shader
+   "x-shader/x-vertex"   shader/vertex-shader})
 
 (defn get-shader
   "Returns a compiled vertext or fragment shader, loaded from the script-id"
@@ -178,7 +179,7 @@
 
     (.linkProgram gl-context program)
 
-    (when-not (get-program-parameter gl-context program const/link-status)
+    (when-not (get-program-parameter gl-context program shader/link-status)
       (throw (js/Error. "Could not initialize shaders")))
 
     (.useProgram gl-context program)
