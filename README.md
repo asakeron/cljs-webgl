@@ -81,8 +81,9 @@ And then opening the `examples/index.html` page in a webGL capable browser.
 
 ```
 
-More working examples (clojurescript implementations of [Learning WebGL](http://learningwebgl.com/blog/?page_id=1217))
-can be found in the examples directory.
+More [working examples](http://asakeron.github.io/cljs-webgl/examples/learningwebgl/lesson_01.html) 
+(clojurescript implementations of [Learning WebGL](http://learningwebgl.com/blog/?page_id=1217))
+can be found in the examples directory
 
 Dependency information
 ----
