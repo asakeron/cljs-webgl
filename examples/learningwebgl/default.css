@@ -1,0 +1,17 @@
+body {
+    background: black;
+    color: #ccc;
+}
+
+.nav {
+    float: right;
+}
+
+a {
+    text-decoration: none;
+    color: #9090FF;
+}
+
+a:hover {
+    color: #7070EE;
+}

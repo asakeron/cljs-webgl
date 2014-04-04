@@ -1,0 +1,45 @@
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="author" content="Richard Hull">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>WebGL Lesson 1 &ndash; A triangle and a square</title>
+        <link type="text/css" rel="stylesheet" href="default.css"></link>
+    </head>
+    <body>
+        <div class="nav">
+            <a href="lesson_02.html" title="WebGL Lesson 2 – Adding Colour">Lesson 2 &#x25B6;</a>
+        </div>
+
+        <h1>WebGL Lesson 1 &ndash; A triangle and a square</h1>
+        <canvas id="canvas" style="border:none" width="500" height="500"></canvas>
+        <p>
+        A clojurescript implementation of <a href="http://learningwebgl.com/blog/?p=28">http://learningwebgl.com/blog/?p=28</a>
+        <p>
+        View the <a href="https://github.com/Asakeron/cljs-webgl/blob/feature/learningwebgl/examples/src/learningwebgl/lesson_01.cljs">source</a>.
+
+        <script type="text/javascript" src="../../target/example.js"></script>
+        <script id="shader-fs" type="x-shader/x-fragment">
+          precision mediump float;
+
+          void main(void) {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+          }
+        </script>
+
+        <script id="shader-vs" type="x-shader/x-vertex">
+          attribute vec3 aVertexPosition;
+
+          uniform mat4 uMVMatrix;
+          uniform mat4 uPMatrix;
+
+          void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+          }
+        </script>
+
+        <script type="text/javascript">
+          learningwebgl.lesson_01.start();
+        </script>
+    </body>
+</html>
