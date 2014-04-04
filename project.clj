@@ -10,6 +10,13 @@
             [lein-marginalia "0.7.1"]]
   :cljsbuild {
     :builds {
+      :src {
+        :jar true
+        :source-paths ["src/cljs"]
+        :incremental? true
+        :foreign-libs [
+            {:file "resources/js/gl-matrix-min.js" :provides ["mat4","mat3"]}
+            {:file "resources/js/webgl-utils.js" :provides ["WebGLUtils"]}]}
       :examples {
         :source-paths ["src/cljs" "examples/src"]
         :incremental? true
@@ -20,4 +27,8 @@
             {:file "resources/js/gl-matrix-min.js" :provides ["mat4","mat3"]}
             {:file "resources/js/webgl-utils.js" :provides ["WebGLUtils"]}]
           :static-fns true
-          :pretty-print true }}}})
+          :closure-warnings {
+            :externs-validation :off
+            :non-standard-jsdoc :off}
+          :pretty-print false
+          :optimizations :simple}}}})
