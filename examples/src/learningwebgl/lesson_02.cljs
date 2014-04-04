@@ -9,7 +9,7 @@
     [cljs-webgl.constants.draw-mode :as draw-mode]
     [cljs-webgl.typed-arrays :as ta]))
 
-(defn start []
+(defn ^:export start []
   (let [canvas      (.getElementById js/document "canvas")
         gl          (init-gl canvas)
         shader-prog (init-shaders gl)
