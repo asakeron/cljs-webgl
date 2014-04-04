@@ -15,3 +15,20 @@ a {
 a:hover {
     color: #7070EE;
 }
+
+.aside {
+    position: absolute;
+    left: 550px;
+    top: 200px;
+    width: 200px;
+    background: #222222;
+    border-radius: 3px;
+    padding: 15px;
+}
+
+.aside ul {
+    margin: 0;
+}
+.aside ul li {
+    margin-left: -15px;
+}
