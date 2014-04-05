@@ -22,6 +22,7 @@
          :x-speed 1
          :y-speed -2
          :z-depth -5.0
+         :keypresses {}
          :filter 0}))
 
 (defn init-textures [gl url]
@@ -56,29 +57,38 @@
 (defn key-down-handler [event]
   (let [key-code (.-keyCode event)]
 
+    (swap! state assoc-in [:keypresses key-code] true)
+
     (when (= key-code 70) ; F
       (swap! state update-in [:filter] #(mod (inc %) 3)))
 
-    (when (= key-code 33) ; Page-Up
-      (swap! state update-in [:z-depth] #(- % 0.05)))
-
-    (when (= key-code 34) ; Page-Down
-      (swap! state update-in [:z-depth] #(+ % 0.05)))
-
-    (when (= key-code 37) ; Left
-      (swap! state update-in [:y-speed] dec))
-
-    (when (= key-code 39) ; Right
-      (swap! state update-in [:y-speed] inc))
-
-    (when (= key-code 38) ; Up
-      (swap! state update-in [:x-speed] dec))
-
-    (when (= key-code 40) ; Down
-      (swap! state update-in [:x-speed] inc))
-
     ; prevent default?
     (not (contains? #{70 33 34 37 39 38 40} key-code))))
+
+(defn key-up-handler [event]
+  (let [key-code (.-keyCode event)]
+    (swap! state assoc-in [:keypresses key-code] false)))
+
+(defn input-handler []
+  (let [key-code (:keypresses @state)]
+
+    (when (key-code 33) ; Page-Up
+      (swap! state update-in [:z-depth] #(- % 0.05)))
+
+    (when (key-code 34) ; Page-Down
+      (swap! state update-in [:z-depth] #(+ % 0.05)))
+
+    (when (key-code 37) ; Left
+      (swap! state update-in [:y-speed] dec))
+
+    (when (key-code 39) ; Right
+      (swap! state update-in [:y-speed] inc))
+
+    (when (key-code 38) ; Up
+      (swap! state update-in [:x-speed] dec))
+
+    (when (key-code 40) ; Down
+      (swap! state update-in [:x-speed] inc))))
 
 (defn update-rotation []
  (swap! state update-in [:x-rotation] + (* 0.1 (:x-speed @state)))
@@ -194,6 +204,7 @@
         perspective-matrix (get-perspective-matrix gl)]
 
     (set! (.-onkeydown js/document) key-down-handler)
+    (set! (.-onkeyup js/document) key-up-handler)
 
     (animate
       (fn [frame] ; frame is not used
@@ -201,6 +212,7 @@
         (clear-color-buffer gl 0.0 0.0 0.0 1.0)
         (clear-depth-buffer gl 1)
 
+        (input-handler)
         (update-rotation)
 
         (mat4/identity
