@@ -3,7 +3,7 @@
     [WebGLUtils]
     [mat4]
     [learningwebgl.common :refer [init-gl init-shaders get-perspective-matrix
-                                  get-position-matrix deg->rad animate]]
+                                  get-position-matrix deg->rad animate load-image]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer clear-depth-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
     [cljs-webgl.constants.buffer-object :as buffer-object]
@@ -12,7 +12,7 @@
     [cljs-webgl.constants.data-type :as data-type]
     [cljs-webgl.constants.texture-parameter-name :as texture-parameter-name]
     [cljs-webgl.constants.texture-filter :as texture-filter]
-    [cljs-webgl.texture :refer [load-image create-texture init-texture]]
+    [cljs-webgl.texture :refer [create-texture]]
     [cljs-webgl.typed-arrays :as ta]))
 
 ; TODO: get rid of atom; use big-bang or incorporate state into animate fn
@@ -22,73 +22,53 @@
          :x-speed 1
          :y-speed -2
          :z-depth -5.0
-         :keypresses {}
          :filter 0}))
 
-(defn init-textures [gl url]
-  (let [tex1 (create-texture gl)
-        tex2 (create-texture gl)
-        tex3 (create-texture gl)]
-
-    (load-image
-      url
-      (fn [img]
-        (init-texture gl
-          :image img
-          :texture tex1
-          :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
-                       texture-parameter-name/texture-min-filter texture-filter/nearest})
-
-        (init-texture gl
-          :image img
-          :texture tex2
-          :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
-                       texture-parameter-name/texture-min-filter texture-filter/linear})
-
-        (init-texture gl
-          :image img
-          :texture tex3
-          :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
-                       texture-parameter-name/texture-min-filter texture-filter/linear-mipmap-nearest}
-          :generate-mipmap true)))
-
-    [tex1 tex2 tex3]))
+(defn init-textures [gl url callback]
+  (load-image
+   url
+   (fn [img]
+     (let [tex1 (create-texture gl
+                                :image img
+                                :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
+                                texture-parameter-name/texture-min-filter texture-filter/nearest})
+           tex2 (create-texture gl
+                     :image img
+                     :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
+                                  texture-parameter-name/texture-min-filter texture-filter/linear})
+           tex3 (create-texture gl
+                     :image img
+                     :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
+                                  texture-parameter-name/texture-min-filter texture-filter/linear-mipmap-nearest}
+                     :generate-mipmaps? true)]
+       (callback [tex1 tex2 tex3])))))
 
 (defn key-down-handler [event]
   (let [key-code (.-keyCode event)]
 
-    (swap! state assoc-in [:keypresses key-code] true)
-
     (when (= key-code 70) ; F
       (swap! state update-in [:filter] #(mod (inc %) 3)))
 
-    ; prevent default?
-    (not (contains? #{70 33 34 37 39 38 40} key-code))))
-
-(defn key-up-handler [event]
-  (let [key-code (.-keyCode event)]
-    (swap! state assoc-in [:keypresses key-code] false)))
-
-(defn input-handler []
-  (let [key-code (:keypresses @state)]
-
-    (when (key-code 33) ; Page-Up
+    (when (= key-code 33) ; Page-Up
       (swap! state update-in [:z-depth] #(- % 0.05)))
 
-    (when (key-code 34) ; Page-Down
+    (when (= key-code 34) ; Page-Down
       (swap! state update-in [:z-depth] #(+ % 0.05)))
 
-    (when (key-code 37) ; Left
+    (when (= key-code 37) ; Left
       (swap! state update-in [:y-speed] dec))
 
-    (when (key-code 39) ; Right
+    (when (= key-code 39) ; Right
       (swap! state update-in [:y-speed] inc))
 
-    (when (key-code 38) ; Up
+    (when (= key-code 38) ; Up
       (swap! state update-in [:x-speed] dec))
 
-    (when (key-code 40) ; Down
-      (swap! state update-in [:x-speed] inc))))
+    (when (= key-code 40) ; Down
+      (swap! state update-in [:x-speed] inc))
+
+    ; prevent default?
+    (not (contains? #{70 33 34 37 39 38 40} key-code))))
 
 (defn update-rotation []
  (swap! state update-in [:x-rotation] + (* 0.1 (:x-speed @state)))
@@ -98,8 +78,6 @@
   (let [canvas      (.getElementById js/document "canvas")
         gl          (init-gl canvas)
         shader-prog (init-shaders gl)
-        crate-textures (init-textures gl "crate.gif")
-
         cube-vertex-position-buffer
                     (create-buffer gl
                       (ta/float32 [
@@ -204,46 +182,45 @@
         perspective-matrix (get-perspective-matrix gl)]
 
     (set! (.-onkeydown js/document) key-down-handler)
-    (set! (.-onkeyup js/document) key-up-handler)
 
-    (animate
-      (fn [frame] ; frame is not used
+    (init-textures gl "crate.gif" (fn [crate-textures]
+      (animate
+        (fn [frame] ; frame is not used
 
-        (clear-color-buffer gl 0.0 0.0 0.0 1.0)
-        (clear-depth-buffer gl 1)
+          (clear-color-buffer gl 0.0 0.0 0.0 1.0)
+          (clear-depth-buffer gl 1)
 
-        (input-handler)
-        (update-rotation)
+          (update-rotation)
 
-        (mat4/identity
-          cube-matrix)
+          (mat4/identity
+            cube-matrix)
 
-        (mat4/translate
-          cube-matrix
-          cube-matrix
-          (ta/float32 [0 0 (:z-depth @state)]))
+          (mat4/translate
+            cube-matrix
+            cube-matrix
+            (ta/float32 [0 0 (:z-depth @state)]))
 
-        (mat4/rotate
-          cube-matrix
-          cube-matrix
-          (deg->rad (:x-rotation @state))
-          (ta/float32 [1 0 0]))
+          (mat4/rotate
+            cube-matrix
+            cube-matrix
+            (deg->rad (:x-rotation @state))
+            (ta/float32 [1 0 0]))
 
-        (mat4/rotate
-          cube-matrix
-          cube-matrix
-          (deg->rad (:y-rotation @state))
-          (ta/float32 [0 1 0]))
+          (mat4/rotate
+            cube-matrix
+            cube-matrix
+            (deg->rad (:y-rotation @state))
+            (ta/float32 [0 1 0]))
 
-        (draw!
-          gl
-          :shader shader-prog
-          :draw-mode draw-mode/triangles
-          :count (.-numItems cube-vertex-indices)
-          :attributes [{:buffer cube-vertex-position-buffer :location vertex-position-attribute}
-                       {:buffer cube-vertex-texture-coords-buffer :location texture-coord-attribute}]
-          :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
-                     {:name "uMVMatrix" :type :mat4 :values cube-matrix}]
-          :textures [{:name "uSampler" :texture (crate-textures (:filter @state))}]
-          :element-array {:buffer cube-vertex-indices :type data-type/unsigned-short :offset 0}
-          :capabilities {capability/depth-test true})))))
+          (draw!
+            gl
+            :shader shader-prog
+            :draw-mode draw-mode/triangles
+            :count (.-numItems cube-vertex-indices)
+            :attributes [{:buffer cube-vertex-position-buffer :location vertex-position-attribute}
+                         {:buffer cube-vertex-texture-coords-buffer :location texture-coord-attribute}]
+            :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
+                       {:name "uMVMatrix" :type :mat4 :values cube-matrix}]
+            :textures [{:name "uSampler" :texture (crate-textures (:filter @state))}]
+            :element-array {:buffer cube-vertex-indices :type data-type/unsigned-short :offset 0}
+            :capabilities {capability/depth-test true})))))))
