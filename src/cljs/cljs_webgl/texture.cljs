@@ -3,7 +3,7 @@
     [cljs-webgl.constants.texture-target :as texture-target]
     [cljs-webgl.constants.texture-parameter-name :as texture-parameter-name]
     [cljs-webgl.constants.webgl :as webgl]
-    [cljs-webgl.constants.texture-mag-filter :as texture-mag-filter]
+    [cljs-webgl.constants.texture-filter :as texture-filter]
     [cljs-webgl.constants.pixel-format :as pixel-format]
     [cljs-webgl.constants.data-type :as data-type]))
 
@@ -59,7 +59,7 @@
                       (init-texture gl-context
                         :image img
                         :texture texture
-                        :parameters {texture-parameter-name/texture-mag-filter texture-mag-filter/nearest
-                                     texture-parameter-name/texture-min-filter texture-mag-filter/nearest})))
+                        :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
+                                     texture-parameter-name/texture-min-filter texture-filter/nearest})))
     texture))
 

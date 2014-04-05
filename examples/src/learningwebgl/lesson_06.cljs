@@ -11,8 +11,7 @@
     [cljs-webgl.constants.draw-mode :as draw-mode]
     [cljs-webgl.constants.data-type :as data-type]
     [cljs-webgl.constants.texture-parameter-name :as texture-parameter-name]
-    [cljs-webgl.constants.texture-mag-filter :as texture-mag-filter]
-    [cljs-webgl.constants.texture-min-filter :as texture-min-filter]
+    [cljs-webgl.constants.texture-filter :as texture-filter]
     [cljs-webgl.texture :refer [load-image create-texture init-texture]]
     [cljs-webgl.typed-arrays :as ta]))
 
@@ -36,20 +35,20 @@
         (init-texture gl
           :image img
           :texture tex1
-          :parameters {texture-parameter-name/texture-mag-filter texture-mag-filter/nearest
-                       texture-parameter-name/texture-min-filter texture-mag-filter/nearest})
+          :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
+                       texture-parameter-name/texture-min-filter texture-filter/nearest})
 
         (init-texture gl
           :image img
           :texture tex2
-          :parameters {texture-parameter-name/texture-mag-filter texture-mag-filter/linear
-                       texture-parameter-name/texture-min-filter texture-mag-filter/linear})
+          :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
+                       texture-parameter-name/texture-min-filter texture-filter/linear})
 
         (init-texture gl
           :image img
           :texture tex3
-          :parameters {texture-parameter-name/texture-mag-filter texture-mag-filter/linear
-                       texture-parameter-name/texture-min-filter texture-min-filter/linear-mipmap-nearest}
+          :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
+                       texture-parameter-name/texture-min-filter texture-filter/linear-mipmap-nearest}
           :generate-mipmap true)))
 
     [tex1 tex2 tex3]))
