@@ -15,7 +15,7 @@
         :source-paths ["src/cljs"]
         :incremental? true
         :foreign-libs [
-            {:file "resources/js/gl-matrix-min.js" :provides ["mat4","mat3"]}
+            {:file "resources/js/gl-matrix-min.js" :provides ["mat4","mat3","vec3"]}
             {:file "resources/js/webgl-utils.js" :provides ["WebGLUtils"]}]}
       :examples {
         :source-paths ["src/cljs" "examples/src"]
@@ -24,7 +24,7 @@
           :output-to "target/example.js"
           :source-map "target/example.map"
           :foreign-libs [
-            {:file "resources/js/gl-matrix-min.js" :provides ["mat4","mat3"]}
+            {:file "resources/js/gl-matrix-min.js" :provides ["mat4","mat3","vec3"]}
             {:file "resources/js/webgl-utils.js" :provides ["WebGLUtils"]}]
           :static-fns true
           :closure-warnings {
