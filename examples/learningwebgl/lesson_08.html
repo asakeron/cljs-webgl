@@ -3,18 +3,29 @@
         <meta charset="utf-8">
         <meta name="author" content="Richard Hull">
         <meta name="viewport" content="width=device-width,initial-scale=1">
-        <title>WebGL Lesson 7 &ndash; basic directional and ambient lighting</title>
+        <title>WebGL Lesson 8 &ndash; the depth buffer, transparency and blending</title>
         <link type="text/css" rel="stylesheet" href="default.css"></link>
     </head>
     <body>
         <div class="nav">
-            <a href="lesson_06.html" title="WebGL Lesson 6 – keyboard input and texture filters">&#x25C0; Lesson 6</a> |
-            <a href="lesson_08.html" title="WebGL Lesson 8 – the depth buffer, transparency and blending">Lesson 8 &#x25B6;</a>
+            <a href="lesson_07.html" title="WebGL Lesson 7 – the depth buffer, transparency and blending">&#x25C0; Lesson 7</a> |
+            <a href="lesson_09.html" title="WebGL Lesson 9 – improving the code structure with lots of moving objects">Lesson 9 &#x25B6;</a>
         </div>
 
-        <h1>WebGL Lesson 7 &ndash; basic directional and ambient lighting</h1>
+        <h1>WebGL Lesson 8 &ndash; the depth buffer, transparency and blending</h1>
 
         <div class="aside extended">
+            <input id="blending" type="checkbox" checked="">
+            <label for="blending">Use blending</label>
+            <table>
+                <tbody>
+                    <tr>
+                        <td>Alpha level:</td>
+                        <td> <input id="alpha" type="text" value="0.5"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>
             <input id="lighting" type="checkbox" checked="">
             <label for="lighting">Use lighting</label>
             <p>(Use cursor keys to spin the box and Page-Up/Page-Down to zoom out/in)
@@ -53,9 +64,9 @@
 
         <canvas id="canvas" style="border:none" width="500" height="500"></canvas>
         <p>
-        A clojurescript implementation of <a href="http://learningwebgl.com/blog/?p=684">http://learningwebgl.com/blog/?p=684</a>
+        A clojurescript implementation of <a href="http://learningwebgl.com/blog/?p=859">http://learningwebgl.com/blog/?p=859</a>
         <p>
-        View the <a href="https://github.com/Asakeron/cljs-webgl/blob/feature/learningwebgl/examples/src/learningwebgl/lesson_07.cljs">source</a>.
+        View the <a href="https://github.com/Asakeron/cljs-webgl/blob/feature/learningwebgl/examples/src/learningwebgl/lesson_08.cljs">source</a>.
 
         <script type="text/javascript" src="../../target/example.js"></script>
         <script id="shader-fs" type="x-shader/x-fragment">
@@ -64,11 +75,13 @@
             varying vec2 vTextureCoord;
             varying vec3 vLightWeighting;
 
+            uniform float uAlpha;
+
             uniform sampler2D uSampler;
 
             void main(void) {
                 vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-                gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+                gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a * uAlpha);
             }
         </script>
 
@@ -106,7 +119,7 @@
         </script>
 
         <script type="text/javascript">
-          learningwebgl.lesson_07.start();
+          learningwebgl.lesson_08.start();
         </script>
     </body>
 </html>
