@@ -5,7 +5,9 @@
     [mat3]
     [mat4]
     [learningwebgl.common :refer [init-gl init-shaders get-perspective-matrix
-                                  get-position-matrix deg->rad animate load-image]]
+                                  get-position-matrix deg->rad animate load-image
+                                  ambient-color directional-color lighting-direction
+                                  lighting checked?]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer clear-depth-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
     [cljs-webgl.constants.buffer-object :as buffer-object]
@@ -26,7 +28,7 @@
          :y-speed -2
          :z-depth -5.0
          :keypresses {}
-         :filter 0}))
+         :filter 2}))
 
 (defn init-textures [gl url callback]
   (load-image
@@ -89,50 +91,6 @@
 (defn update-rotation []
  (swap! state update-in [:x-rotation] + (* 0.1 (:x-speed @state)))
  (swap! state update-in [:y-rotation] + (* 0.1 (:y-speed @state))))
-
-(defn get-float [element-id]
-  (js/parseFloat
-    (.-value
-      (.getElementById
-        js/document
-        element-id))))
-
-(defn ambient-color []
-  {:name "uAmbientColor"
-   :type :vec3
-   :values (ta/float32 [
-              (get-float "ambientR")
-              (get-float "ambientG")
-              (get-float "ambientB")])})
-
-(defn directional-color []
-  {:name "uDirectionalColor"
-   :type :vec3
-   :values (ta/float32 [
-              (get-float "directionalR")
-              (get-float "directionalG")
-              (get-float "directionalB")])})
-
-(defn lighting-direction []
-  (let [lighting-dir (ta/float32 [
-                        (get-float "lightDirectionX")
-                        (get-float "lightDirectionY")
-                        (get-float "lightDirectionZ")])
-        adjusted-dir (vec3/create)]
-
-    (vec3/normalize adjusted-dir lighting-dir)
-    (vec3/scale adjusted-dir adjusted-dir -1.0)
-
-    {:name "uLightingDirection"
-     :type :vec3
-     :values adjusted-dir}))
-
-(defn lighting []
-  (let [use-lighting? (.-checked (.getElementById js/document "lighting"))]
-    (cons
-      {:name "uUseLighting" :type :int :values (ta/unsigned-int32 [use-lighting?])}
-      (when use-lighting?
-        [(ambient-color) (lighting-direction) (directional-color) ]))))
 
 (defn ^:export start []
   (let [canvas      (.getElementById js/document "canvas")
@@ -335,7 +293,7 @@
                         [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
                          {:name "uMVMatrix" :type :mat4 :values cube-matrix}
                          {:name "uNMatrix" :type :mat3 :values normal-matrix}]
-                        (lighting))
+                        (lighting (checked? "lighting")))
             :textures [{:name "uSampler" :texture (crate-textures (:filter @state))}]
             :element-array {:buffer cube-vertex-indices :type data-type/unsigned-short :offset 0}
             :capabilities {capability/depth-test true})))))))

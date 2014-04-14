@@ -34,15 +34,15 @@ a:hover {
     margin-left: -15px;
 }
 
-.lesson-7 {
+.extended {
     width: 400px;
 }
 
-.lesson-7 input[type=text] {
+.extended input[type=text] {
     width: 50px;
 }
 
-.lesson-7 td {
+.extended td {
     width: 90px;
     text-align: right;
 }
