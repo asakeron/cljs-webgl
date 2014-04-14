@@ -12,6 +12,7 @@
     [cljs-webgl.constants.data-type :as data-type]
     [cljs-webgl.constants.texture-parameter-name :as texture-parameter-name]
     [cljs-webgl.constants.texture-filter :as texture-filter]
+    [cljs-webgl.constants.webgl :as webgl]
     [cljs-webgl.texture :refer [create-texture]]
     [cljs-webgl.typed-arrays :as ta]))
 
@@ -29,19 +30,25 @@
   (load-image
    url
    (fn [img]
-     (let [tex1 (create-texture gl
-                                :image img
-                                :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
-                                texture-parameter-name/texture-min-filter texture-filter/nearest})
-           tex2 (create-texture gl
-                     :image img
-                     :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
-                                  texture-parameter-name/texture-min-filter texture-filter/linear})
-           tex3 (create-texture gl
-                     :image img
-                     :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
-                                  texture-parameter-name/texture-min-filter texture-filter/linear-mipmap-nearest}
-                     :generate-mipmaps? true)]
+     (let [tex1 (create-texture
+                  gl
+                  :image img
+                  :pixel-store-modes {webgl/unpack-flip-y-webgl true}
+                  :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
+                               texture-parameter-name/texture-min-filter texture-filter/nearest})
+           tex2 (create-texture
+                  gl
+                  :image img
+                  :pixel-store-modes {webgl/unpack-flip-y-webgl true}
+                  :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
+                               texture-parameter-name/texture-min-filter texture-filter/linear})
+           tex3 (create-texture
+                  gl
+                  :image img
+                  :pixel-store-modes {webgl/unpack-flip-y-webgl true}
+                  :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
+                               texture-parameter-name/texture-min-filter texture-filter/linear-mipmap-nearest}
+                  :generate-mipmaps? true)]
        (callback [tex1 tex2 tex3])))))
 
 (defn key-down-handler [event]

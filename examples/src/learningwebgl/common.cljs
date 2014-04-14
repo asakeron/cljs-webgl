@@ -7,6 +7,7 @@
     [cljs-webgl.texture :refer [create-texture]]
     [cljs-webgl.constants.texture-parameter-name :as texture-parameter-name]
     [cljs-webgl.constants.texture-filter :as texture-filter]
+    [cljs-webgl.constants.webgl :as webgl]
     [cljs-webgl.typed-arrays :as ta]))
 
 (enable-console-print!)
@@ -62,8 +63,10 @@
   "Loads the texture from the given URL. Note that the image is loaded in the background,
    and the returned texture will not immediately be fully initialized."
   [gl-context url callback-fn]
-  (load-image url (fn [img] (callback-fn (create-texture
-                             gl-context
-                             :image img
-                             :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
-                                          texture-parameter-name/texture-min-filter texture-filter/nearest})))))
+  (load-image url (fn [img] (callback-fn
+                              (create-texture
+                                gl-context
+                                :image img
+                                :pixel-store-modes {webgl/unpack-flip-y-webgl true}
+                                :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
+                                             texture-parameter-name/texture-min-filter texture-filter/nearest})))))
