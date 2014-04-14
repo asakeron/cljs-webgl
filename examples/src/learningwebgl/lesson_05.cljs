@@ -3,14 +3,13 @@
     [WebGLUtils]
     [mat4]
     [learningwebgl.common :refer [init-gl init-shaders get-perspective-matrix
-                                  get-position-matrix deg->rad animate]]
+                                  get-position-matrix deg->rad animate load-texture]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer clear-depth-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
     [cljs-webgl.constants.buffer-object :as buffer-object]
     [cljs-webgl.constants.capability :as capability]
     [cljs-webgl.constants.draw-mode :as draw-mode]
     [cljs-webgl.constants.data-type :as data-type]
-    [cljs-webgl.texture :refer [load-texture]]
     [cljs-webgl.typed-arrays :as ta]))
 
 
@@ -18,8 +17,6 @@
   (let [canvas      (.getElementById js/document "canvas")
         gl          (init-gl canvas)
         shader-prog (init-shaders gl)
-        nehe-texture (load-texture gl "nehe.gif")
-
         cube-vertex-position-buffer
                     (create-buffer gl
                       (ta/float32 [
@@ -123,29 +120,29 @@
         texture-coord-attribute   (get-attrib-location gl shader-prog "aTextureCoord")
         perspective-matrix (get-perspective-matrix gl)
         two-degrees (deg->rad 2)]
+    (load-texture gl "nehe.gif" (fn [nehe-texture]
+      (animate
+        (fn [frame] ; frame is not used
 
-    (animate
-      (fn [frame] ; frame is not used
+          (clear-color-buffer gl 0.0 0.0 0.0 1.0)
+          (clear-depth-buffer gl 1)
 
-        (clear-color-buffer gl 0.0 0.0 0.0 1.0)
-        (clear-depth-buffer gl 1)
+          ; Doesn't replicate the same tumbling that the original does.
+          (mat4/rotate
+            cube-matrix
+            cube-matrix
+            two-degrees
+            (ta/float32 [1 1 1]))
 
-        ; Doesn't replicate the same tumbling that the original does.
-        (mat4/rotate
-          cube-matrix
-          cube-matrix
-          two-degrees
-          (ta/float32 [1 1 1]))
-
-        (draw!
-          gl
-          :shader shader-prog
-          :draw-mode draw-mode/triangles
-          :count (.-numItems cube-vertex-indices)
-          :attributes [{:buffer cube-vertex-position-buffer :location vertex-position-attribute}
-                       {:buffer cube-vertex-texture-coords-buffer :location texture-coord-attribute}]
-          :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
-                     {:name "uMVMatrix" :type :mat4 :values cube-matrix}]
-          :textures [{:name "uSampler" :texture nehe-texture}]
-          :element-array {:buffer cube-vertex-indices :type data-type/unsigned-short :offset 0}
-          :capabilities {capability/depth-test true})))))
+          (draw!
+            gl
+            :shader shader-prog
+            :draw-mode draw-mode/triangles
+            :count (.-numItems cube-vertex-indices)
+            :attributes [{:buffer cube-vertex-position-buffer :location vertex-position-attribute}
+                         {:buffer cube-vertex-texture-coords-buffer :location texture-coord-attribute}]
+            :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
+                       {:name "uMVMatrix" :type :mat4 :values cube-matrix}]
+            :textures [{:name "uSampler" :texture nehe-texture}]
+            :element-array {:buffer cube-vertex-indices :type data-type/unsigned-short :offset 0}
+            :capabilities {capability/depth-test true})))))))

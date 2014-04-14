@@ -112,21 +112,24 @@
     (or offset 0)))
 
 (defn ^:private set-texture
-  [gl-context shader {:keys [texture name]}]
+  [gl-context shader {:keys [texture name texture-unit]}]
+  (let [unit (if texture-unit (+ texture-unit/texture0 texture-unit)
+                              texture-unit/texture0)
+        uniform-index (or texture-unit 0)]
 
-  (.activeTexture
-    gl-context
-    texture-unit/texture0) ; TODO: probably want to parameterize this
+    (.activeTexture
+      gl-context
+      texture-unit/texture0)
 
-  (.bindTexture
-    gl-context
-    texture-target/texture-2d ; TODO: probably want to parameterize this
-    texture)
+    (.bindTexture
+      gl-context
+      texture-target/texture-2d
+      texture)
 
-  (.uniform1i
-    gl-context
-   (shaders/get-uniform-location gl-context shader name)
-    0)) ; TODO: probably want to parameterize this
+    (.uniform1i
+      gl-context
+      (shaders/get-uniform-location gl-context shader name)
+      0)))
 
 (def ^:private default-capabilities
   {capability/blend                    false

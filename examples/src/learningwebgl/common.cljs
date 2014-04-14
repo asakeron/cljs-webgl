@@ -4,6 +4,9 @@
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer draw!]]
     [cljs-webgl.context :refer [get-context]]
     [cljs-webgl.shaders :refer [get-shader create-program get-attrib-location]]
+    [cljs-webgl.texture :refer [create-texture]]
+    [cljs-webgl.constants.texture-parameter-name :as texture-parameter-name]
+    [cljs-webgl.constants.texture-filter :as texture-filter]
     [cljs-webgl.typed-arrays :as ta]))
 
 (enable-console-print!)
@@ -44,3 +47,23 @@
               (.requestAnimFrame  js/window (loop (inc frame)))
               (draw-fn frame)))]
     ((loop 0))))
+
+(defn load-image
+  ""
+  [url callback-fn]
+  (let [img (js/Image.)]
+    (set! (.-onload img) (fn [] (callback-fn img)))
+    (set! (.-crossOrigin img) "anonymous")
+    (set! (.-src img) url)))
+
+; TODO: probably want to parameterize some of the details here
+; TODO: deprecate this method?
+(defn load-texture
+  "Loads the texture from the given URL. Note that the image is loaded in the background,
+   and the returned texture will not immediately be fully initialized."
+  [gl-context url callback-fn]
+  (load-image url (fn [img] (callback-fn (create-texture
+                             gl-context
+                             :image img
+                             :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
+                                          texture-parameter-name/texture-min-filter texture-filter/nearest})))))
