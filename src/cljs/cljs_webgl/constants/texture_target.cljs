@@ -1,0 +1,13 @@
+(ns cljs-webgl.constants.texture-target)
+
+(def texture-2d                  0x0DE1)
+(def texture                     0x1702)
+(def texture-cube-map            0x8513)
+(def texture-binding-cube-map    0x8514)
+(def texture-cube-map-positive-x 0x8515)
+(def texture-cube-map-negative-x 0x8516)
+(def texture-cube-map-positive-y 0x8517)
+(def texture-cube-map-negative-y 0x8518)
+(def texture-cube-map-positive-z 0x8519)
+(def texture-cube-map-negative-z 0x851A)
+(def max-cube-map-texture-size   0x851C)

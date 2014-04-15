@@ -1,0 +1,10 @@
+(ns cljs-webgl.constants.blending-factor-dest)
+
+(def zero                0)
+(def one                 1)
+(def src-color           0x0300)
+(def one-minus-src-color 0x0301)
+(def src-alpha           0x0302)
+(def one-minus-src-alpha 0x0303)
+(def dst-alpha           0x0304)
+(def one-minus-dst-alpha 0x0305)

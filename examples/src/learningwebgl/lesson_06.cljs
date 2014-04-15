@@ -1,17 +1,95 @@
-(ns learningwebgl.lesson-05
+(ns learningwebgl.lesson-06
   (:require
     [WebGLUtils]
     [mat4]
     [learningwebgl.common :refer [init-gl init-shaders get-perspective-matrix
-                                  get-position-matrix deg->rad animate load-texture]]
+                                  get-position-matrix deg->rad animate load-image]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer clear-depth-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
     [cljs-webgl.constants.buffer-object :as buffer-object]
     [cljs-webgl.constants.capability :as capability]
     [cljs-webgl.constants.draw-mode :as draw-mode]
     [cljs-webgl.constants.data-type :as data-type]
+    [cljs-webgl.constants.texture-parameter-name :as texture-parameter-name]
+    [cljs-webgl.constants.texture-filter :as texture-filter]
+    [cljs-webgl.constants.webgl :as webgl]
+    [cljs-webgl.texture :refer [create-texture]]
     [cljs-webgl.typed-arrays :as ta]))
 
+; TODO: get rid of atom; use big-bang or incorporate state into animate fn
+(def state
+  (atom {:x-rotation 0
+         :y-rotation 0
+         :x-speed 1
+         :y-speed -2
+         :z-depth -5.0
+         :keypresses {}
+         :filter 0}))
+
+(defn init-textures [gl url callback]
+  (load-image
+   url
+   (fn [img]
+     (let [tex1 (create-texture
+                  gl
+                  :image img
+                  :pixel-store-modes {webgl/unpack-flip-y-webgl true}
+                  :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
+                               texture-parameter-name/texture-min-filter texture-filter/nearest})
+           tex2 (create-texture
+                  gl
+                  :image img
+                  :pixel-store-modes {webgl/unpack-flip-y-webgl true}
+                  :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
+                               texture-parameter-name/texture-min-filter texture-filter/linear})
+           tex3 (create-texture
+                  gl
+                  :image img
+                  :pixel-store-modes {webgl/unpack-flip-y-webgl true}
+                  :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
+                               texture-parameter-name/texture-min-filter texture-filter/linear-mipmap-nearest}
+                  :generate-mipmaps? true)]
+       (callback [tex1 tex2 tex3])))))
+
+(defn key-down-handler [event]
+  (let [key-code (.-keyCode event)]
+
+    (swap! state assoc-in [:keypresses key-code] true)
+
+    (when (= key-code 70) ; F
+      (swap! state update-in [:filter] #(mod (inc %) 3)))
+
+    ; prevent default?
+    (not (contains? #{70 33 34 37 39 38 40} key-code))))
+
+(defn key-up-handler [event]
+  (let [key-code (.-keyCode event)]
+    (swap! state assoc-in [:keypresses key-code] false)))
+
+(defn input-handler []
+  (let [key-code (:keypresses @state)]
+
+    (when (key-code 33) ; Page-Up
+      (swap! state update-in [:z-depth] #(- % 0.05)))
+
+    (when (key-code 34) ; Page-Down
+      (swap! state update-in [:z-depth] #(+ % 0.05)))
+
+    (when (key-code 37) ; Left
+      (swap! state update-in [:y-speed] dec))
+
+    (when (key-code 39) ; Right
+      (swap! state update-in [:y-speed] inc))
+
+    (when (key-code 38) ; Up
+      (swap! state update-in [:x-speed] dec))
+
+    (when (key-code 40) ; Down
+      (swap! state update-in [:x-speed] inc))))
+
+(defn update-rotation []
+ (swap! state update-in [:x-rotation] + (* 0.1 (:x-speed @state)))
+ (swap! state update-in [:y-rotation] + (* 0.1 (:y-speed @state))))
 
 (defn ^:export start []
   (let [canvas      (.getElementById js/document "canvas")
@@ -114,25 +192,44 @@
                       buffer-object/static-draw
                       1)
 
-        cube-matrix (get-position-matrix [ 0.0 0.0 -5.0])
+        cube-matrix (mat4/create)
 
         vertex-position-attribute (get-attrib-location gl shader-prog "aVertexPosition")
         texture-coord-attribute   (get-attrib-location gl shader-prog "aTextureCoord")
-        perspective-matrix (get-perspective-matrix gl)
-        two-degrees (deg->rad 2)]
-    (load-texture gl "nehe.gif" (fn [nehe-texture]
+        perspective-matrix (get-perspective-matrix gl)]
+
+    (set! (.-onkeydown js/document) key-down-handler)
+    (set! (.-onkeyup js/document) key-up-handler)
+
+    (init-textures gl "crate.gif" (fn [crate-textures]
       (animate
         (fn [frame] ; frame is not used
 
           (clear-color-buffer gl 0.0 0.0 0.0 1.0)
           (clear-depth-buffer gl 1)
 
-          ; Doesn't replicate the same tumbling that the original does.
+          (input-handler)
+          (update-rotation)
+
+          (mat4/identity
+            cube-matrix)
+
+          (mat4/translate
+            cube-matrix
+            cube-matrix
+            (ta/float32 [0 0 (:z-depth @state)]))
+
           (mat4/rotate
             cube-matrix
             cube-matrix
-            two-degrees
-            (ta/float32 [1 1 1]))
+            (deg->rad (:x-rotation @state))
+            (ta/float32 [1 0 0]))
+
+          (mat4/rotate
+            cube-matrix
+            cube-matrix
+            (deg->rad (:y-rotation @state))
+            (ta/float32 [0 1 0]))
 
           (draw!
             gl
@@ -143,6 +240,6 @@
                          {:buffer cube-vertex-texture-coords-buffer :location texture-coord-attribute}]
             :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
                        {:name "uMVMatrix" :type :mat4 :values cube-matrix}]
-            :textures [{:name "uSampler" :texture nehe-texture}]
+            :textures [{:name "uSampler" :texture (crate-textures (:filter @state))}]
             :element-array {:buffer cube-vertex-indices :type data-type/unsigned-short :offset 0}
             :capabilities {capability/depth-test true})))))))

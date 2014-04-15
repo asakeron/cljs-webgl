@@ -1,7 +1,12 @@
 (ns cljs-webgl.buffers
   (:require
     [cljs-webgl.typed-arrays :as ta]
-    [cljs-webgl.constants :as constants]
+    [cljs-webgl.constants.capability :as capability]
+    [cljs-webgl.constants.clear-buffer-mask :as clear-buffer]
+    [cljs-webgl.constants.buffer-object :as buffer-object]
+    [cljs-webgl.constants.texture-target :as texture-target]
+    [cljs-webgl.constants.texture-unit :as texture-unit]
+    [cljs-webgl.constants.data-type :as data-type]
     [cljs-webgl.shaders :as shaders]))
 
 (defn create-buffer
@@ -9,9 +14,9 @@
 
   `data` must be a typed-array
 
-  `target` may be `cljs-webgl.constants/array-buffer` or `cljs-webgl.constants/element-array-buffer`
+  `target` may be `cljs-webgl.constants.buffer-object/array-buffer` or `cljs-webgl.constants.buffer-object/element-array-buffer`
 
-  `usage` may be `cljs-webgl.constants/static-draw` or `cljs-webgl.constants/dynamic-draw`
+  `usage` may be `cljs-webgl.constants.buffer-object/static-draw` or `cljs-webgl.constants.buffer-object/dynamic-draw`
 
   `item-size` [optional] will set the item size as an attribute on the buffer, and the calculate the number of items accordingly.
 
@@ -38,7 +43,7 @@
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context red green blue alpha]
   (.clearColor gl-context red green blue alpha)
-  (.clear gl-context constants/color-buffer-bit)
+  (.clear gl-context clear-buffer/color-buffer-bit)
   gl-context)
 
 (defn clear-depth-buffer
@@ -50,7 +55,7 @@
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context depth]
   (.clearDepth gl-context depth)
-  (.clear gl-context constants/depth-buffer-bit)
+  (.clear gl-context clear-buffer/depth-buffer-bit)
   gl-context)
 
 (defn clear-stencil-buffer
@@ -62,39 +67,35 @@
   * [glClear](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glClear.xml)"
   [gl-context index]
   (.clearStencil gl-context index)
-  (.clear gl-context constants/stencil-buffer-bit)
+  (.clear gl-context clear-buffer/stencil-buffer-bit)
   gl-context)
-
-(defn ^:private bool->float
-  [x]
-  (if x 1.0 0.0))
 
 (defn ^:private set-uniform
   [gl-context shader {:keys [name type values transpose]}]
   (let [uniform-location (shaders/get-uniform-location gl-context shader name)]
     (case type
-      :bool   (.uniform1fv gl-context uniform-location (ta/float32 (map bool->float values)))
-      :bvec2  (.uniform2fv gl-context uniform-location (ta/float32 (map bool->float values)))
-      :bvec3  (.uniform3fv gl-context uniform-location (ta/float32 (map bool->float values)))
-      :bvec4  (.uniform4fv gl-context uniform-location (ta/float (map bool->float values)))
-      :float  (.uniform1fv gl-context uniform-location (ta/float32 values))
-      :vec2   (.uniform2fv gl-context uniform-location (ta/float32 values))
-      :vec3   (.uniform3fv gl-context uniform-location (ta/float32 values))
-      :vec4   (.uniform4fv gl-context uniform-location (ta/float32 values))
-      :int    (.uniform1iv gl-context uniform-location (ta/int32 values))
-      :ivec2  (.uniform2iv gl-context uniform-location (ta/int32 values))
-      :ivec3  (.uniform3iv gl-context uniform-location (ta/int32 values))
-      :ivec4  (.uniform4iv gl-context uniform-location (ta/int32 values))
-      :mat2   (.uniformMatrix2fv gl-context uniform-location transpose (ta/float32 values))
-      :mat3   (.uniformMatrix3fv gl-context uniform-location transpose (ta/float32 values))
-      :mat4   (.uniformMatrix4fv gl-context uniform-location transpose (ta/float32 values))
+      :bool   (.uniform1fv gl-context uniform-location values)
+      :bvec2  (.uniform2fv gl-context uniform-location values)
+      :bvec3  (.uniform3fv gl-context uniform-location values)
+      :bvec4  (.uniform4fv gl-context uniform-location values)
+      :float  (.uniform1fv gl-context uniform-location values)
+      :vec2   (.uniform2fv gl-context uniform-location values)
+      :vec3   (.uniform3fv gl-context uniform-location values)
+      :vec4   (.uniform4fv gl-context uniform-location values)
+      :int    (.uniform1iv gl-context uniform-location values)
+      :ivec2  (.uniform2iv gl-context uniform-location values)
+      :ivec3  (.uniform3iv gl-context uniform-location values)
+      :ivec4  (.uniform4iv gl-context uniform-location values)
+      :mat2   (.uniformMatrix2fv gl-context uniform-location transpose values)
+      :mat3   (.uniformMatrix3fv gl-context uniform-location transpose values)
+      :mat4   (.uniformMatrix4fv gl-context uniform-location transpose values)
       nil)))
 
 (defn ^:private set-attribute
   [gl-context {:keys [buffer location components-per-vertex type normalized? stride offset]}]
   (.bindBuffer
     gl-context
-    constants/array-buffer
+    buffer-object/array-buffer
     buffer)
 
   (.enableVertexAttribArray
@@ -105,47 +106,50 @@
     gl-context
     location
     (or components-per-vertex (.-itemSize buffer))
-    (or type constants/float)
+    (or type data-type/float)
     (or normalized? false)
     (or stride 0)
     (or offset 0)))
 
 (defn ^:private set-texture
-  [gl-context shader {:keys [texture name]}]
+  [gl-context shader {:keys [texture name texture-unit]}]
+  (let [unit (if texture-unit (+ texture-unit/texture0 texture-unit)
+                              texture-unit/texture0)
+        uniform-index (or texture-unit 0)]
 
-  (.activeTexture
-    gl-context
-    constants/texture0) ; TODO: probably want to parameterize this
+    (.activeTexture
+      gl-context
+      texture-unit/texture0)
 
-  (.bindTexture
-    gl-context
-    constants/texture-2d ; TODO: probably want to parameterize this
-    texture)
+    (.bindTexture
+      gl-context
+      texture-target/texture-2d
+      texture)
 
-  (.uniform1i
-    gl-context
-   (shaders/get-uniform-location gl-context shader name)
-    0)) ; TODO: probably want to parameterize this
+    (.uniform1i
+      gl-context
+      (shaders/get-uniform-location gl-context shader name)
+      0)))
 
 (def ^:private default-capabilities
-  {constants/blend                    false
-   constants/cull-face                false
-   constants/depth-test               false
-   constants/dither                   true
-   constants/polygon-offset-fill      false
-   constants/sample-alpha-to-coverage false
-   constants/sample-coverage          false
-   constants/scissor-test             false
-   constants/stencil-test             false})
+  {capability/blend                    false
+   capability/cull-face                false
+   capability/depth-test               false
+   capability/dither                   true
+   capability/polygon-offset-fill      false
+   capability/sample-alpha-to-coverage false
+   capability/sample-coverage          false
+   capability/scissor-test             false
+   capability/stencil-test             false})
 
 (defn ^:private set-capability
   "Enables/disables acording to `enabled?` a given server-side GL `capability`
 
-   The valid values for `capability` are: `cljs-webgl.constants/blend`,
-   `cljs-webgl.constants/cull-face`, `cljs-webgl.constants/depth-test`, `cljs-webgl.constants/dither`,
-   `cljs-webgl.constants/polygon-offset-fill`, `cljs-webgl.constants/sample-alpha-to-coverage`,
-   `cljs-webgl.constants/sample-coverage`, `cljs-webgl.constants/scissor-test`,
-   `cljs-webgl.constants/stencil-test`
+   The valid values for `capability` are: `cljs-webgl.constants.capability/blend`,
+   `cljs-webgl.constants.capability/cull-face`, `cljs-webgl.constants.capability/depth-test`, `cljs-webgl.constants.capability/dither`,
+   `cljs-webgl.constants.capability/polygon-offset-fill`, `cljs-webgl.constants.capability/sample-alpha-to-coverage`,
+   `cljs-webgl.constants.capability/sample-coverage`, `cljs-webgl.constants.capability/scissor-test`,
+   `cljs-webgl.constants.capability/stencil-test`
 
    Relevant OpenGL ES reference pages:
 
@@ -160,7 +164,8 @@
 
 (defn draw!
   [gl-context & {:keys [shader draw-mode first count attributes
-                        uniforms textures element-array capabilities] :as opts}]
+                        uniforms textures element-array capabilities
+                        blend-function] :as opts}]
 
   (.useProgram gl-context shader)
 
@@ -179,10 +184,13 @@
   (if (nil? element-array)
     (.drawArrays gl-context draw-mode (or first 0) count)
     (do
-      (.bindBuffer gl-context constants/element-array-buffer (:buffer element-array))
+      (.bindBuffer gl-context buffer-object/element-array-buffer (:buffer element-array))
       (.drawElements gl-context draw-mode count (:type element-array) (:offset element-array))))
 
   (doseq [a attributes]
     (.disableVertexAttribArray gl-context (:location a)))
+
+  (doseq [[k v] blend-function]
+    (.blendFunc gl-context k v))
 
   gl-context)

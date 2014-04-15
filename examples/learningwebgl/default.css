@@ -1,0 +1,48 @@
+body {
+    background: black;
+    color: #ccc;
+    font-family: monospace;
+}
+
+.nav {
+    float: right;
+}
+
+a {
+    text-decoration: none;
+    color: #9090FF;
+}
+
+a:hover {
+    color: #7070EE;
+}
+
+.aside {
+    position: absolute;
+    left: 550px;
+    top: 200px;
+    width: 200px;
+    background: #222222;
+    border-radius: 3px;
+    padding: 15px;
+}
+
+.aside ul {
+    margin: 0;
+}
+.aside ul li {
+    margin-left: -15px;
+}
+
+.extended {
+    width: 400px;
+}
+
+.extended input[type=text] {
+    width: 50px;
+}
+
+.extended td {
+    width: 90px;
+    text-align: right;
+}

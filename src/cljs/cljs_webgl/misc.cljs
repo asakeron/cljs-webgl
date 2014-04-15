@@ -5,11 +5,11 @@
 
    `capability` is a single of capability to test.
 
-   The valid values for capability are: `cljs-webgl.constants/blend`,
-   `cljs-webgl.constants/cull-face`, `cljs-webgl.constants/depth-test`, `cljs-webgl.constants/dither`,
-   `cljs-webgl.constants/polygon-offset-fill`, `cljs-webgl.constants/sample-alpha-to-coverage`,
-   `cljs-webgl.constants/sample-coverage`, `cljs-webgl.constants/scissor-test`,
-   `cljs-webgl.constants/stencil-test`
+   The valid values for capability are: `cljs-webgl.constants.capability/blend`,
+   `cljs-webgl.constants.capability/cull-face`, `cljs-webgl.constants.capability/depth-test`,
+   `cljs-webgl.constants.capability/dither`, `cljs-webgl.constants.capability/polygon-offset-fill`,
+   `cljs-webgl.constants.capability/sample-alpha-to-coverage`, `cljs-webgl.constants.capability/sample-coverage`,
+   `cljs-webgl.constants.capability/scissor-test`, `cljs-webgl.constants.capability/stencil-test`
 
    Relevant OpenGL ES reference pages:
 
