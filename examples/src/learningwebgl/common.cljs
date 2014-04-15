@@ -123,6 +123,6 @@
 
 (defn lighting [use-lighting?]
   (cons
-    {:name "uUseLighting" :type :int :values (ta/unsigned-int32 [(if use-lighting? 1 0)])}
+    {:name "uUseLighting" :type :int :values (ta/int32 [(if use-lighting? 1 0)])}
     (when use-lighting?
       [(ambient-color) (lighting-direction) (directional-color) ])))
