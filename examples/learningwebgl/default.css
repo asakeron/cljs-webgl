@@ -1,6 +1,7 @@
 body {
     background: black;
     color: #ccc;
+    font-family: monospace;
 }
 
 .nav {
@@ -31,4 +32,17 @@ a:hover {
 }
 .aside ul li {
     margin-left: -15px;
+}
+
+.extended {
+    width: 400px;
+}
+
+.extended input[type=text] {
+    width: 50px;
+}
+
+.extended td {
+    width: 90px;
+    text-align: right;
 }

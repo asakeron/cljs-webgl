@@ -1,9 +1,13 @@
-(ns learningwebgl.lesson-06
+(ns learningwebgl.lesson-07
   (:require
     [WebGLUtils]
+    [vec3]
+    [mat3]
     [mat4]
     [learningwebgl.common :refer [init-gl init-shaders get-perspective-matrix
-                                  get-position-matrix deg->rad animate load-image]]
+                                  get-position-matrix deg->rad animate load-image
+                                  ambient-color directional-color lighting-direction
+                                  lighting checked?]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer clear-depth-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
     [cljs-webgl.constants.buffer-object :as buffer-object]
@@ -24,26 +28,23 @@
          :y-speed -2
          :z-depth -5.0
          :keypresses {}
-         :filter 0}))
+         :filter 2}))
 
 (defn init-textures [gl url callback]
   (load-image
    url
    (fn [img]
-     (let [tex1 (create-texture
-                  gl
+     (let [tex1 (create-texture gl
                   :image img
                   :pixel-store-modes {webgl/unpack-flip-y-webgl true}
                   :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
                                texture-parameter-name/texture-min-filter texture-filter/nearest})
-           tex2 (create-texture
-                  gl
+           tex2 (create-texture gl
                   :image img
                   :pixel-store-modes {webgl/unpack-flip-y-webgl true}
                   :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
                                texture-parameter-name/texture-min-filter texture-filter/linear})
-           tex3 (create-texture
-                  gl
+           tex3 (create-texture gl
                   :image img
                   :pixel-store-modes {webgl/unpack-flip-y-webgl true}
                   :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
@@ -59,8 +60,8 @@
     (when (= key-code 70) ; F
       (swap! state update-in [:filter] #(mod (inc %) 3)))
 
-    ; prevent default?
-    (not (contains? #{70 33 34 37 39 38 40} key-code))))
+    ; prevent default? (allow left/right)
+    (not (contains? #{70 33 34 38 40} key-code))))
 
 (defn key-up-handler [event]
   (let [key-code (.-keyCode event)]
@@ -137,6 +138,48 @@
                       buffer-object/static-draw
                       3)
 
+        cube-vertex-normal-buffer
+                    (create-buffer gl
+                      (ta/float32 [
+                                  ; Front face
+                                   0.0,  0.0,  1.0,
+                                   0.0,  0.0,  1.0,
+                                   0.0,  0.0,  1.0,
+                                   0.0,  0.0,  1.0,
+
+                                  ; Back face
+                                   0.0,  0.0, -1.0,
+                                   0.0,  0.0, -1.0,
+                                   0.0,  0.0, -1.0,
+                                   0.0,  0.0, -1.0,
+
+                                  ; Top face
+                                   0.0,  1.0,  0.0,
+                                   0.0,  1.0,  0.0,
+                                   0.0,  1.0,  0.0,
+                                   0.0,  1.0,  0.0,
+
+                                  ; Bottom face
+                                   0.0, -1.0,  0.0,
+                                   0.0, -1.0,  0.0,
+                                   0.0, -1.0,  0.0,
+                                   0.0, -1.0,  0.0,
+
+                                  ; Right face
+                                   1.0,  0.0,  0.0,
+                                   1.0,  0.0,  0.0,
+                                   1.0,  0.0,  0.0,
+                                   1.0,  0.0,  0.0,
+
+                                  ; Left face
+                                  -1.0,  0.0,  0.0,
+                                  -1.0,  0.0,  0.0,
+                                  -1.0,  0.0,  0.0,
+                                  -1.0,  0.0,  0.0])
+                      buffer-object/array-buffer
+                      buffer-object/static-draw
+                      3)
+
         cube-vertex-texture-coords-buffer
                     (create-buffer gl
                       (ta/float32 [
@@ -194,7 +237,10 @@
 
         cube-matrix (mat4/create)
 
+        normal-matrix (mat3/create)
+
         vertex-position-attribute (get-attrib-location gl shader-prog "aVertexPosition")
+        vertex-normal-attribute   (get-attrib-location gl shader-prog "aVertexNormal")
         texture-coord-attribute   (get-attrib-location gl shader-prog "aTextureCoord")
         perspective-matrix (get-perspective-matrix gl)]
 
@@ -231,15 +277,23 @@
             (deg->rad (:y-rotation @state))
             (ta/float32 [0 1 0]))
 
+          (mat3/normalFromMat4
+            normal-matrix
+            cube-matrix)
+
           (draw!
             gl
             :shader shader-prog
             :draw-mode draw-mode/triangles
             :count (.-numItems cube-vertex-indices)
             :attributes [{:buffer cube-vertex-position-buffer :location vertex-position-attribute}
+                         {:buffer cube-vertex-normal-buffer :location vertex-normal-attribute}
                          {:buffer cube-vertex-texture-coords-buffer :location texture-coord-attribute}]
-            :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
-                       {:name "uMVMatrix" :type :mat4 :values cube-matrix}]
+            :uniforms (concat
+                        [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
+                         {:name "uMVMatrix" :type :mat4 :values cube-matrix}
+                         {:name "uNMatrix" :type :mat3 :values normal-matrix}]
+                        (lighting (checked? "lighting")))
             :textures [{:name "uSampler" :texture (crate-textures (:filter @state))}]
             :element-array {:buffer cube-vertex-indices :type data-type/unsigned-short :offset 0}
             :capabilities {capability/depth-test true})))))))

@@ -164,7 +164,8 @@
 
 (defn draw!
   [gl-context & {:keys [shader draw-mode first count attributes
-                        uniforms textures element-array capabilities] :as opts}]
+                        uniforms textures element-array capabilities
+                        blend-function] :as opts}]
 
   (.useProgram gl-context shader)
 
@@ -188,5 +189,8 @@
 
   (doseq [a attributes]
     (.disableVertexAttribArray gl-context (:location a)))
+
+  (doseq [[k v] blend-function]
+    (.blendFunc gl-context k v))
 
   gl-context)

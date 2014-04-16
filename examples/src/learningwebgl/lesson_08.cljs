@@ -1,13 +1,18 @@
-(ns learningwebgl.lesson-06
+(ns learningwebgl.lesson-08
   (:require
     [WebGLUtils]
+    [vec3]
+    [mat3]
     [mat4]
     [learningwebgl.common :refer [init-gl init-shaders get-perspective-matrix
-                                  get-position-matrix deg->rad animate load-image]]
+                                  get-position-matrix deg->rad animate load-image
+                                  ambient-color directional-color lighting-direction
+                                  lighting blending checked?]]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer clear-depth-buffer draw!]]
     [cljs-webgl.shaders :refer [get-attrib-location]]
     [cljs-webgl.constants.buffer-object :as buffer-object]
     [cljs-webgl.constants.capability :as capability]
+    [cljs-webgl.constants.blending-factor-dest :as blending-factor-dest]
     [cljs-webgl.constants.draw-mode :as draw-mode]
     [cljs-webgl.constants.data-type :as data-type]
     [cljs-webgl.constants.texture-parameter-name :as texture-parameter-name]
@@ -20,47 +25,18 @@
 (def state
   (atom {:x-rotation 0
          :y-rotation 0
-         :x-speed 1
-         :y-speed -2
+         :x-speed 3
+         :y-speed -3
          :z-depth -5.0
-         :keypresses {}
-         :filter 0}))
-
-(defn init-textures [gl url callback]
-  (load-image
-   url
-   (fn [img]
-     (let [tex1 (create-texture
-                  gl
-                  :image img
-                  :pixel-store-modes {webgl/unpack-flip-y-webgl true}
-                  :parameters {texture-parameter-name/texture-mag-filter texture-filter/nearest
-                               texture-parameter-name/texture-min-filter texture-filter/nearest})
-           tex2 (create-texture
-                  gl
-                  :image img
-                  :pixel-store-modes {webgl/unpack-flip-y-webgl true}
-                  :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
-                               texture-parameter-name/texture-min-filter texture-filter/linear})
-           tex3 (create-texture
-                  gl
-                  :image img
-                  :pixel-store-modes {webgl/unpack-flip-y-webgl true}
-                  :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
-                               texture-parameter-name/texture-min-filter texture-filter/linear-mipmap-nearest}
-                  :generate-mipmaps? true)]
-       (callback [tex1 tex2 tex3])))))
+         :keypresses {}}))
 
 (defn key-down-handler [event]
   (let [key-code (.-keyCode event)]
 
     (swap! state assoc-in [:keypresses key-code] true)
 
-    (when (= key-code 70) ; F
-      (swap! state update-in [:filter] #(mod (inc %) 3)))
-
-    ; prevent default?
-    (not (contains? #{70 33 34 37 39 38 40} key-code))))
+    ; prevent default? (allow left/right)
+    (not (contains? #{33 34 38 40} key-code))))
 
 (defn key-up-handler [event]
   (let [key-code (.-keyCode event)]
@@ -137,6 +113,48 @@
                       buffer-object/static-draw
                       3)
 
+        cube-vertex-normal-buffer
+                    (create-buffer gl
+                      (ta/float32 [
+                                  ; Front face
+                                   0.0,  0.0,  1.0,
+                                   0.0,  0.0,  1.0,
+                                   0.0,  0.0,  1.0,
+                                   0.0,  0.0,  1.0,
+
+                                  ; Back face
+                                   0.0,  0.0, -1.0,
+                                   0.0,  0.0, -1.0,
+                                   0.0,  0.0, -1.0,
+                                   0.0,  0.0, -1.0,
+
+                                  ; Top face
+                                   0.0,  1.0,  0.0,
+                                   0.0,  1.0,  0.0,
+                                   0.0,  1.0,  0.0,
+                                   0.0,  1.0,  0.0,
+
+                                  ; Bottom face
+                                   0.0, -1.0,  0.0,
+                                   0.0, -1.0,  0.0,
+                                   0.0, -1.0,  0.0,
+                                   0.0, -1.0,  0.0,
+
+                                  ; Right face
+                                   1.0,  0.0,  0.0,
+                                   1.0,  0.0,  0.0,
+                                   1.0,  0.0,  0.0,
+                                   1.0,  0.0,  0.0,
+
+                                  ; Left face
+                                  -1.0,  0.0,  0.0,
+                                  -1.0,  0.0,  0.0,
+                                  -1.0,  0.0,  0.0,
+                                  -1.0,  0.0,  0.0])
+                      buffer-object/array-buffer
+                      buffer-object/static-draw
+                      3)
+
         cube-vertex-texture-coords-buffer
                     (create-buffer gl
                       (ta/float32 [
@@ -194,52 +212,77 @@
 
         cube-matrix (mat4/create)
 
+        normal-matrix (mat3/create)
+
         vertex-position-attribute (get-attrib-location gl shader-prog "aVertexPosition")
+        vertex-normal-attribute   (get-attrib-location gl shader-prog "aVertexNormal")
         texture-coord-attribute   (get-attrib-location gl shader-prog "aTextureCoord")
         perspective-matrix (get-perspective-matrix gl)]
 
     (set! (.-onkeydown js/document) key-down-handler)
     (set! (.-onkeyup js/document) key-up-handler)
 
-    (init-textures gl "crate.gif" (fn [crate-textures]
-      (animate
-        (fn [frame] ; frame is not used
+    (load-image
+      "glass.gif"
+      (fn [img]
+        (let [glass-texture (create-texture gl
+                              :image img
+                              :pixel-store-modes {webgl/unpack-flip-y-webgl true}
+                              :parameters {texture-parameter-name/texture-mag-filter texture-filter/linear
+                                           texture-parameter-name/texture-min-filter texture-filter/linear-mipmap-nearest}
+                              :generate-mipmaps? true)]
 
-          (clear-color-buffer gl 0.0 0.0 0.0 1.0)
-          (clear-depth-buffer gl 1)
+          (animate
+            (fn [frame] ; frame is not used
 
-          (input-handler)
-          (update-rotation)
+              (clear-color-buffer gl 0.0 0.0 0.0 1.0)
+              (clear-depth-buffer gl 1)
 
-          (mat4/identity
-            cube-matrix)
+              (input-handler)
+              (update-rotation)
 
-          (mat4/translate
-            cube-matrix
-            cube-matrix
-            (ta/float32 [0 0 (:z-depth @state)]))
+              (mat4/identity
+                cube-matrix)
 
-          (mat4/rotate
-            cube-matrix
-            cube-matrix
-            (deg->rad (:x-rotation @state))
-            (ta/float32 [1 0 0]))
+              (mat4/translate
+                cube-matrix
+                cube-matrix
+                (ta/float32 [0 0 (:z-depth @state)]))
 
-          (mat4/rotate
-            cube-matrix
-            cube-matrix
-            (deg->rad (:y-rotation @state))
-            (ta/float32 [0 1 0]))
+              (mat4/rotate
+                cube-matrix
+                cube-matrix
+                (deg->rad (:x-rotation @state))
+                (ta/float32 [1 0 0]))
 
-          (draw!
-            gl
-            :shader shader-prog
-            :draw-mode draw-mode/triangles
-            :count (.-numItems cube-vertex-indices)
-            :attributes [{:buffer cube-vertex-position-buffer :location vertex-position-attribute}
-                         {:buffer cube-vertex-texture-coords-buffer :location texture-coord-attribute}]
-            :uniforms [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
-                       {:name "uMVMatrix" :type :mat4 :values cube-matrix}]
-            :textures [{:name "uSampler" :texture (crate-textures (:filter @state))}]
-            :element-array {:buffer cube-vertex-indices :type data-type/unsigned-short :offset 0}
-            :capabilities {capability/depth-test true})))))))
+              (mat4/rotate
+                cube-matrix
+                cube-matrix
+                (deg->rad (:y-rotation @state))
+                (ta/float32 [0 1 0]))
+
+              (mat3/normalFromMat4
+                normal-matrix
+                cube-matrix)
+
+              (draw!
+                gl
+                :shader shader-prog
+                :draw-mode draw-mode/triangles
+                :count (.-numItems cube-vertex-indices)
+                :attributes [{:buffer cube-vertex-position-buffer :location vertex-position-attribute}
+                             {:buffer cube-vertex-normal-buffer :location vertex-normal-attribute}
+                             {:buffer cube-vertex-texture-coords-buffer :location texture-coord-attribute}]
+                :uniforms (concat
+                            [{:name "uPMatrix" :type :mat4 :values perspective-matrix}
+                             {:name "uMVMatrix" :type :mat4 :values cube-matrix}
+                             {:name "uNMatrix" :type :mat3 :values normal-matrix}]
+                            (lighting (checked? "lighting"))
+                            (blending (checked? "blending")))
+                :textures [{:name "uSampler" :texture glass-texture}]
+                :element-array {:buffer cube-vertex-indices :type data-type/unsigned-short :offset 0}
+                :capabilities (if (checked? "blending")
+                                {capability/depth-test false capability/blend true}
+                                {capability/depth-test true capability/blend false})
+                :blend-function (when (checked? "blending")
+                                  {blending-factor-dest/src-alpha 1})))))))))
