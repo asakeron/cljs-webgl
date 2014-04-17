@@ -1,5 +1,6 @@
 (ns cljs-webgl.buffers
   (:require
+    [cljs-webgl.context :as context]
     [cljs-webgl.typed-arrays :as ta]
     [cljs-webgl.constants.capability :as capability]
     [cljs-webgl.constants.clear-buffer-mask :as clear-buffer]
@@ -143,7 +144,7 @@
    capability/stencil-test             false})
 
 (defn ^:private set-capability
-  "Enables/disables acording to `enabled?` a given server-side GL `capability`
+  "Enables/disables according to `enabled?` a given server-side GL `capability`
 
    The valid values for `capability` are: `cljs-webgl.constants.capability/blend`,
    `cljs-webgl.constants.capability/cull-face`, `cljs-webgl.constants.capability/depth-test`, `cljs-webgl.constants.capability/dither`,
@@ -162,10 +163,30 @@
     (.disable gl-context capability))
   gl-context)
 
+(defn ^:private set-viewport
+  "Sets `gl-context` viewport according to `viewport` which is expected to have the form:
+
+  {:x,
+   :y,
+   :width,
+   :height}
+
+  Relevant OpenGL ES reference pages:
+
+  * [viewport](http://www.khronos.org/opengles/sdk/docs/man/xhtml/glViewport.xml)"
+  [gl-context {:keys [x y width height] :as viewport}]
+  (.viewport gl-context x y width height))
+
 (defn draw!
   [gl-context & {:keys [shader draw-mode first count attributes
                         uniforms textures element-array capabilities
-                        blend-function] :as opts}]
+                        blend-function viewport] :as opts}]
+
+  (set-viewport gl-context (or viewport
+                               {:x      0,
+                                :y      0,
+                                :width  (context/get-drawing-buffer-width gl-context),
+                                :height (context/get-drawing-buffer-height gl-context)}))
 
   (.useProgram gl-context shader)
 
