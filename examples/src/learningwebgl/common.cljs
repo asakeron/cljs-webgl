@@ -3,7 +3,7 @@
     [vec3]
     [mat4]
     [cljs-webgl.buffers :refer [create-buffer clear-color-buffer draw!]]
-    [cljs-webgl.context :refer [get-context]]
+    [cljs-webgl.context :refer [get-context get-viewport]]
     [cljs-webgl.shaders :refer [get-shader create-program get-attrib-location]]
     [cljs-webgl.texture :refer [create-texture]]
     [cljs-webgl.constants.texture-parameter-name :as texture-parameter-name]
@@ -17,9 +17,6 @@
   (let [gl (get-context canvas)]
     (when-not gl
       (throw (js/Error. "Could not initialize WebGL")))
-
-    (set! (.-viewportWidth gl) (.-width canvas))
-    (set! (.-viewportHeight gl) (.-height canvas))
     gl))
 
 (defn init-shaders [gl]
@@ -28,12 +25,14 @@
     (create-program gl fragment-shader vertex-shader)))
 
 (defn get-perspective-matrix [gl]
-  (mat4/perspective
-    (mat4/create)
-    45
-    (/  (.-viewportWidth gl) (.-viewportHeight gl))
-    0.1
-    100.0))
+  (let [{viewport-width :width,
+         viewport-height :height} (get-viewport gl)]
+    (mat4/perspective
+      (mat4/create)
+      45
+      (/  viewport-width viewport-height)
+      0.1
+      100.0)))
 
 (defn get-position-matrix [v]
   (let [m (mat4/create)]
