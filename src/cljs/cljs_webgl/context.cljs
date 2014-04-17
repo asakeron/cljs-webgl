@@ -1,5 +1,6 @@
 ;; Contains functions for querying information from a WebGL context.
-(ns cljs-webgl.context)
+(ns cljs-webgl.context
+  (:require [cljs-webgl.constants.parameter-name :as parameter-name]))
 
 (defn get-context
   "Gets a WebGL context from a canvas element.
@@ -86,6 +87,20 @@ This function is helpful for testing if the requested parameters were satisfied.
   "Returns the buffer current height."
   [gl-context]
   (.-drawingBufferHeight gl-context))
+
+(defn get-viewport
+  "Returns the current viewport for a given `gl-context` as a map with the form:
+
+  {:x,
+    :y,
+    :width,
+    :height}"
+  [gl-context]
+  (let [[x y w h] (.apply js/Array [] (.getParameter gl-context parameter-name/viewport))] ;; TODO: Is there any other way to access typed array values?
+    {:x      x,
+     :y      y,
+     :width  w,
+     :height h}))
 
 (defn is-context-lost?
   "Returns whether the context was lost.
