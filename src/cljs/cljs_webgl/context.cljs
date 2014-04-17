@@ -10,27 +10,34 @@
      :stencil
      :antialias
      :premultiplied-apha
-     :preserve-drawing-buffer}
+     :preserve-drawing-buffer
+     :prefer-low-power-to-high-performance
+     :fail-if-major-performance-caveat}
 If you don't specify any key, the default value is assumed.
 
 For further information on context creation parameters see [WebGLContextAttributes](https://www.khronos.org/registry/webgl/specs/1.0.2/#WEBGLCONTEXTATTRIBUTES);"
   ([canvas-element]
      (get-context canvas-element {}))
   ([canvas-element context-attributes]
-     (let [default-attributes {:alpha true
-                               :depth true,
-                               :stencil false,
-                               :antialias true,
-                               :premultiplied-alpha true,
-                               :preserve-drawing-buffer false}
-           attributes->js (fn [{:keys [alpha depth stencil antialias premultiplied-alpha preserve-drawing-buffer]}]
+     (let [default-attributes {:alpha                                true
+                               :depth                                true,
+                               :stencil                              false,
+                               :antialias                            true,
+                               :premultiplied-alpha                  true,
+                               :preserve-drawing-buffer              false,
+                               :prefer-low-power-to-high-performance false,
+                               :fail-if-major-performance-caveat     false}
+           attributes->js (fn [{:keys [alpha depth stencil antialias premultiplied-alpha preserve-drawing-buffer
+                                       prefer-low-power-to-high-performance fail-if-major-performance-caveat]}]
                             (clj->js
                               {:alpha alpha,
                                :depth depth,
                                :stencil stencil,
                                :antialias antialias,
                                :premultipliedAlpha premultiplied-alpha,
-                               :preserveDrawingBuffer preserve-drawing-buffer}))
+                               :preserveDrawingBuffer preserve-drawing-buffer,
+                               :preferLowPowerToHighPerformance prefer-low-power-to-high-performance,
+                               :failIfMajorPerformanceCaveat fail-if-major-performance-caveat}))
            opts (attributes->js (merge default-attributes context-attributes))]
        (or
          (.getContext canvas-element "experimental-webgl" opts)
@@ -44,7 +51,9 @@ For further information on context creation parameters see [WebGLContextAttribut
      :stencil
      :antialias
      :premultiplied-apha
-     :preserve-drawing-buffer}
+     :preserve-drawing-buffer
+     :prefer-low-power-to-high-performance
+     :fail-if-major-performance-caveat}
 
 This function is helpful for testing if the requested parameters were satisfied."
   [gl-context]
@@ -54,8 +63,9 @@ This function is helpful for testing if the requested parameters were satisfied.
      :stencil (.-stencil js-obj),
      :antialias (.-antialias js-obj),
      :premultiplied-alpha (.-premultipliedAlpha js-obj),
-     :preserve-drawing-buffer (.-preserveDrawingBuffer js-obj)
-     }))
+     :preserve-drawing-buffer (.-preserveDrawingBuffer js-obj),
+     :prefer-low-power-to-high-performance (.-preferLowPowerToHighPerformance js-obj),
+     :fail-if-major-performance-caveat  (.-failIfMajorPerformanceCaveat js-obj)}))
 
 (defn get-canvas
   "Returns the canvas element from the given WebGL context."
