@@ -96,6 +96,6 @@ Dependency information
 
 Documentation
 ----
-See the [API Documentation]((http://asakeron.github.io/cljs-webgl/doc/api).
+See the [API Documentation](http://asakeron.github.io/cljs-webgl/doc/api).
 
 To generate Marginalia documentation locally, run `lein marg src/cljs`.
