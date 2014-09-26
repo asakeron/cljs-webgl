@@ -91,7 +91,7 @@ Dependency information
 [Leiningen](http://github.com/technomancy/leiningen/) dependency information:
 
 ```
-[cljs-webgl "0.1.4-SNAPSHOT"]
+[cljs-webgl "0.1.5-SNAPSHOT"]
 ```
 
 Documentation
