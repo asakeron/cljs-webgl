@@ -1,12 +1,12 @@
-(defproject cljs-webgl "0.1.5-SNAPSHOT"
+(defproject cljs-webgl "0.1.6-SNAPSHOT"
   :description "WebGL binding to ClojureScript"
   :url "https://github.com/Asakeron/cljs-webgl"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojurescript "0.0-2202"]]
+  :dependencies [[org.clojure/clojurescript "0.0-3211"]]
   :source-paths ["src/cljs"]
-  :plugins [[lein-cljsbuild "1.0.3"]
-            [lein-marginalia "0.7.1"]]
+  :plugins [[lein-cljsbuild "1.0.5"]
+            [lein-marginalia "0.8.0"]]
   :cljsbuild {
     :builds {
       :src {
