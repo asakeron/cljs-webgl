@@ -3,11 +3,11 @@
   :url "https://github.com/Asakeron/cljs-webgl"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-3211"]]
+  :dependencies [[org.clojure/clojure "1.10.3"]
+                 [org.clojure/clojurescript "1.10.764"]]
   :source-paths ["src/cljs"]
-  :plugins [[lein-cljsbuild "1.0.5"]
-            [lein-marginalia "0.8.0"]]
+  :plugins [[lein-cljsbuild "1.1.8"]
+            [lein-marginalia "0.9.1"]]
   :cljsbuild {
     :builds {
       :src {
